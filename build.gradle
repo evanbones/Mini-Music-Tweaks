@@ -7,7 +7,7 @@ plugins {
 
 wiki {
     wikiAccessToken = System.getenv("WIKI_ACCESS_TOKEN")
-    docs.create("mod-template") {
+    docs.create("music-tweaks") {
         root = file("docs/")
     }
 }

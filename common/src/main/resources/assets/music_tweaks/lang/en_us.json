@@ -1,0 +1,16 @@
+{
+  "config.music_tweaks.title": "Mini Music Tweaks Config",
+  "config.music_tweaks.category.general": "General",
+
+  "config.music_tweaks.enabled": "Dynamic Combat Music",
+  "config.music_tweaks.enabled.tooltip": "Toggle the dynamic combat music feature on or off.",
+
+  "config.music_tweaks.min_pursuit_entities": "Min Pursuit Entities",
+  "config.music_tweaks.min_pursuit_entities.tooltip": "The minimum amount of hostile mobs that must be nearby to trigger combat music.",
+
+  "config.music_tweaks.decay_time": "Combat Decay Time (Seconds)",
+  "config.music_tweaks.decay_time.tooltip": "How long combat music will continue playing after no hostile mobs are nearby.",
+
+  "config.music_tweaks.sounds": "Combat Music Sounds",
+  "config.music_tweaks.sounds.tooltip": "List of SoundEvent Resource Locations that can be chosen for combat music."
+}

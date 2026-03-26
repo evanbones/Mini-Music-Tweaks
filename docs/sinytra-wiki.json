@@ -1,7 +1,7 @@
 {
-  "id": "mod-template",
+  "id": "music-tweaks",
   "platforms": {
-    "curseforge": "mod-template",
-    "modrinth": "mod-template"
+    "curseforge": "music-tweaks",
+    "modrinth": "music-tweaks"
   }
 }

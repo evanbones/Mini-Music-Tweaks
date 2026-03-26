@@ -8,21 +8,21 @@
     "${mod_author}"
   ],
   "contact": {
-    "homepage": "https://github.com/evanbones/Mod-Template",
-    "sources": "https://github.com/evanbones/Mod-Template"
+    "homepage": "https://github.com/evanbones/Mini-Music-Tweaks",
+    "sources": "https://github.com/evanbones/Mini-Music-Tweaks"
   },
   "license": "${license}",
   "icon": "${mod_id}.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.evandev.mod_template.ExampleMod"
+      "com.evandev.music_tweaks.MiniMusicTweaks"
     ],
     "client": [
-      "com.evandev.mod_template.client.ExampleModClient"
+      "com.evandev.music_tweaks.client.MiniMusicTweaksClient"
     ],
     "modmenu": [
-      "com.evandev.mod_template.compat.ModMenuIntegration"
+      "com.evandev.music_tweaks.compat.ModMenuIntegration"
     ]
   },
   "mixins": [
