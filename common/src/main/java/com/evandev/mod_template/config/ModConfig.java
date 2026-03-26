@@ -1,18 +1,56 @@
 package com.evandev.mod_template.config;
 
-import folk.sisby.kaleido.api.ReflectiveConfig;
-import folk.sisby.kaleido.lib.quiltconfig.api.annotations.Comment;
-import folk.sisby.kaleido.lib.quiltconfig.api.values.TrackedValue;
+import com.evandev.mod_template.Constants;
+import com.evandev.mod_template.platform.Services;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 
-public class ModConfig extends ReflectiveConfig {
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-    public final Client client = new Client();
+public class ModConfig {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final File CONFIG_FILE = Services.PLATFORM.getConfigDirectory().resolve("mod_template.json").toFile();
+    private static ModConfig INSTANCE;
 
-    @Comment("An example integer config option.")
-    public final TrackedValue<Integer> exampleInteger = this.value(3);
+    @SerializedName("enabled")
+    public boolean enabled = true;
 
-    public static class Client extends Section {
-        @Comment("An example client boolean config option.")
-        public final TrackedValue<Boolean> exampleClientBoolean = this.value(true);
+    @SerializedName("missing_id_map")
+    public Map<String, String> missingIdMap = new HashMap<>();
+
+    public static ModConfig get() {
+        if (INSTANCE == null) {
+            load();
+        }
+        return INSTANCE;
+    }
+
+    public static void load() {
+        if (CONFIG_FILE.exists()) {
+            try (FileReader reader = new FileReader(CONFIG_FILE)) {
+                INSTANCE = GSON.fromJson(reader, ModConfig.class);
+            } catch (Exception e) {
+                Constants.LOG.error("Failed to load mod_template.json", e);
+                INSTANCE = new ModConfig();
+                save();
+            }
+        } else {
+            INSTANCE = new ModConfig();
+            save();
+        }
+    }
+
+    public static void save() {
+        try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
+            GSON.toJson(INSTANCE, writer);
+        } catch (IOException e) {
+            Constants.LOG.error("Failed to save mod_template.json", e);
+        }
     }
 }

@@ -1,3 +1,4 @@
+
 # User-specific stuff
 .idea/
 .vscode/
@@ -7,10 +8,7 @@
 *.iws
 
 # IntelliJ
-out
-.idea/*
-!.idea/scopes
-
+out/
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 
