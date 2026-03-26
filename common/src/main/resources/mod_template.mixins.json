@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.evandev.mod_template.mixin",
+  "compatibilityLevel": "JAVA_18",
+  "mixins": [
+  ],
+  "client": [
+    "ExampleMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
