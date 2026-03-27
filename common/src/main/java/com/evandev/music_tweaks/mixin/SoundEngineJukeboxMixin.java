@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,8 +43,8 @@ public abstract class SoundEngineJukeboxMixin {
     private boolean wasMusicPaused = false;
 
     @Inject(method = "play", at = @At("HEAD"))
-    private void injectPlay(SoundInstance sound, CallbackInfo ci) {
-        if (!ModConfig.get().betterJukeboxes) return;
+    private void injectPlay(SoundInstance sound, CallbackInfoReturnable<SoundEngine.PlayResult> cir) {
+        if (!ModConfig.get().general.betterJukeboxes.value()) return;
 
         if (sound.getSource() == SoundSource.RECORDS && sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
             modifiedSound.setRelative(true);
@@ -59,9 +60,9 @@ public abstract class SoundEngineJukeboxMixin {
     @Inject(method = "tick(Z)V", at = @At("HEAD"))
     private void injectTick(boolean isPaused, CallbackInfo ci) {
         boolean inCombat = MusicClientLogic.getInstance().isInCombat();
-        boolean betterJukeboxes = ModConfig.get().betterJukeboxes;
+        boolean betterJukeboxes = ModConfig.get().general.betterJukeboxes.value();
 
-        double maxDistance = ModConfig.get().jukeboxDistance;
+        double maxDistance = ModConfig.get().general.jukeboxDistance.value();
         double minDistance = maxDistance * 0.25;
         double minDistanceSquared = minDistance * minDistance;
         double maxDistanceSquared = maxDistance * maxDistance;

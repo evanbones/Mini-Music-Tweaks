@@ -2,73 +2,46 @@ package com.evandev.music_tweaks.config;
 
 import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.platform.Services;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
+import folk.sisby.kaleido.api.ReflectiveConfig;
+import folk.sisby.kaleido.lib.quiltconfig.api.annotations.Comment;
+import folk.sisby.kaleido.lib.quiltconfig.api.values.TrackedValue;
+import folk.sisby.kaleido.lib.quiltconfig.api.values.ValueList;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+public class ModConfig extends ReflectiveConfig {
 
-public class ModConfig {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final File CONFIG_FILE = Services.PLATFORM.getConfigDirectory().resolve("music_tweaks.json").toFile();
-    private static ModConfig INSTANCE;
-
-    @SerializedName("enabled")
-    public boolean enabled = false;
-
-    @SerializedName("min_pursuit_entities")
-    public int minPursuitEntities = 3;
-
-    @SerializedName("decay_time")
-    public int decayTime = 3;
-
-    @SerializedName("sounds")
-    public List<String> sounds = new ArrayList<>(List.of("minecraft:music_disc.pigstep", "minecraft:music_disc.mellohi"));
-
-    @SerializedName("music_frequency")
-    public MusicFrequency musicFrequency = MusicFrequency.DEFAULT;
-
-    @SerializedName("show_music_toast")
-    public boolean showMusicToast = true;
-
-    @SerializedName("better_jukeboxes")
-    public boolean betterJukeboxes = true;
-
-    @SerializedName("jukebox_distance")
-    public double jukeboxDistance = 64.0;
+    public static final ModConfig INSTANCE = ReflectiveConfig.createToml(
+            Services.PLATFORM.getConfigDirectory(),
+            Constants.MOD_ID,
+            "main",
+            ModConfig.class
+    );
+    public final General general = new General();
 
     public static ModConfig get() {
-        if (INSTANCE == null) {
-            load();
-        }
         return INSTANCE;
     }
 
-    public static void load() {
-        if (CONFIG_FILE.exists()) {
-            try (FileReader reader = new FileReader(CONFIG_FILE)) {
-                INSTANCE = GSON.fromJson(reader, ModConfig.class);
-            } catch (Exception e) {
-                Constants.LOG.error("Failed to load music_tweaks.json", e);
-                INSTANCE = new ModConfig();
-                save();
-            }
-        } else {
-            INSTANCE = new ModConfig();
-            save();
-        }
-    }
+    public static class General extends Section {
 
-    public static void save() {
-        try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
-            GSON.toJson(INSTANCE, writer);
-        } catch (IOException e) {
-            Constants.LOG.error("Failed to save music_tweaks.json", e);
-        }
+        @Comment("Toggle the dynamic combat music feature on or off.")
+        public final TrackedValue<Boolean> enabled = this.value(false);
+
+        @Comment("The minimum amount of hostile mobs that must be nearby to trigger combat music.")
+        public final TrackedValue<Integer> minPursuitEntities = this.value(3);
+
+        @Comment("How long combat music will continue playing after no hostile mobs are nearby.")
+        public final TrackedValue<Integer> decayTime = this.value(3);
+
+        @Comment("List of SoundEvent Resource Locations that can be chosen for combat music.")
+        public final TrackedValue<ValueList<String>> sounds = this.value(ValueList.create(
+                "",
+                "minecraft:music_disc.mellohi", "minecraft:music_disc.pigstep"
+        ));
+
+        @Comment("Fades out background music when near a playing Jukebox.")
+        public final TrackedValue<Boolean> betterJukeboxes = this.value(true);
+
+        @Comment("The radius in blocks around a jukebox that will fade out background music.")
+        public final TrackedValue<Double> jukeboxDistance = this.value(64.0);
     }
 }

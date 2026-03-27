@@ -12,7 +12,7 @@ public class MiniMusicTweaks {
     public MiniMusicTweaks(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
 
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             MiniMusicTweaksClient.register(modContainer, modEventBus);
         }
     }

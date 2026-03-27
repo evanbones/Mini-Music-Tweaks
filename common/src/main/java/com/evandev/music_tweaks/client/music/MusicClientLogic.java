@@ -1,12 +1,12 @@
 package com.evandev.music_tweaks.client.music;
 
-import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -15,6 +15,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.AABB;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class MusicClientLogic {
 
@@ -44,7 +46,7 @@ public class MusicClientLogic {
 
     public void onClientTick(Minecraft mc) {
         ModConfig config = ModConfig.get();
-        if (mc.level == null || !config.enabled) return;
+        if (mc.level == null || !config.general.enabled.value()) return;
 
         LocalPlayer player = mc.player;
         if (player == null) return;
@@ -60,14 +62,14 @@ public class MusicClientLogic {
 
         if (mc.level.getGameTime() % 20 == 0) {
             int entityCount = getEntities(player);
-            if (entityCount > config.minPursuitEntities) {
+            if (entityCount > config.general.minPursuitEntities.value()) {
                 ticksSinceCombatUpdate = 0;
                 inCombat = true;
             } else {
                 ticksSinceCombatUpdate += 20;
             }
 
-            if (inCombat && ticksSinceCombatUpdate > config.decayTime * 20) {
+            if (inCombat && ticksSinceCombatUpdate > config.general.decayTime.value() * 20) {
                 endCombat();
             }
         }
@@ -80,9 +82,9 @@ public class MusicClientLogic {
     }
 
     private void startCombatMusic(Minecraft mc, ModConfig config) {
-        SoundEvent sound = pickSound(mc.player.getRandom(), config);
-        if (sound != null) {
-            currentCombatMusic = new CombatSoundInstance(sound);
+        Optional<Holder.Reference<SoundEvent>> sound = pickSound(Objects.requireNonNull(mc.player).getRandom(), config);
+        if (sound.isPresent()) {
+            currentCombatMusic = new CombatSoundInstance(sound.get().value());
             mc.getSoundManager().play(currentCombatMusic);
         }
     }
@@ -100,27 +102,22 @@ public class MusicClientLogic {
         }
 
         AABB box = new AABB(-12D, -10D, -12D, 12D, 10D, 12D).move(player.blockPosition());
-        return player.clientLevel.getEntitiesOfClass(
+        return player.level().getEntitiesOfClass(
                 Monster.class,
                 box,
                 LivingEntity::isAlive
         ).size();
     }
 
-    private SoundEvent pickSound(RandomSource rand, ModConfig config) {
-        List<String> soundList = config.sounds;
-        if (soundList.isEmpty()) return null;
+    private Optional<Holder.Reference<SoundEvent>> pickSound(RandomSource rand, ModConfig config) {
+        List<String> soundList = config.general.sounds.value();
+        if (soundList.isEmpty()) return Optional.empty();
 
         int idx = rand.nextInt(soundList.size());
         String soundStr = soundList.get(idx).trim();
 
-        ResourceLocation soundLocation = ResourceLocation.parse(soundStr);
-        SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(soundLocation);
+        Identifier soundLocation = Identifier.parse(soundStr);
 
-        if (sound == null) {
-            Constants.LOG.error("Invalid sound event resource location detected: {}", soundStr);
-            return null;
-        }
-        return sound;
+        return BuiltInRegistries.SOUND_EVENT.get(soundLocation);
     }
 }

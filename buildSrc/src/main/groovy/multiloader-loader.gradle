@@ -17,6 +17,10 @@ dependencies {
         capabilities {
             requireCapability "$group:$mod_id"
         }
+        def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+        attributes {
+            attribute(loaderAttribute, 'common')
+        }
     }
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')
@@ -32,9 +36,16 @@ processResources {
     from(configurations.commonResources)
 }
 
+tasks.named('sourcesJar', Jar) {
+    dependsOn(configurations.commonJava)
+    from(configurations.commonJava)
+    dependsOn(configurations.commonResources)
+    from(configurations.commonResources)
+}
+
 publishMods {
     changelog = rootProject.file("CHANGELOG-LATEST.md").text
-    type = STABLE
+    type = BETA
     version = "${project.version}-${minecraft_version}-${project.name}"
     displayName = "${mod_name} ${project.name.capitalize()} ${minecraft_version} - ${project.version}"
     modLoaders.add(project.name)
@@ -43,15 +54,11 @@ publishMods {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "1496528"
         minecraftVersions.add("${minecraft_version}")
-
-        optional("cloth-config")
     }
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = "eiONV3dI"
         minecraftVersions.add("${minecraft_version}")
-
-        optional("cloth-config")
     }
 }

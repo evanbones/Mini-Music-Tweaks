@@ -4,10 +4,9 @@ import com.evandev.music_tweaks.Constants;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -23,14 +22,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class MusicHandler implements ResourceManagerReloadListener {
     public static final MusicHandler INSTANCE = new MusicHandler();
-    private static final Map<ResourceLocation, MusicMetadata> MUSIC_DB = new HashMap<>();
-    private static final ResourceLocation DATA_LOCATION = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musics.json");
+    private static final Map<Identifier, MusicMetadata> MUSIC_DB = new HashMap<>();
+    private static final Identifier DATA_LOCATION = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "musics.json");
 
-    public static MusicMetadata getMusicInfo(ResourceLocation location) {
+    public static MusicMetadata getMusicInfo(Identifier location) {
         if (MUSIC_DB.containsKey(location)) {
             return MUSIC_DB.get(location);
         }
@@ -66,21 +64,19 @@ public class MusicHandler implements ResourceManagerReloadListener {
         if (playable != null) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level != null) {
-                Optional<Holder<JukeboxSong>> songHolder = playable.song().unwrap(mc.level.registryAccess());
-                if (songHolder.isPresent() && songHolder.get().isBound()) {
-                    Component description = songHolder.get().value().description();
-                    String fullDescription = description.getString();
+                JukeboxSong song = playable.song().value();
+                Component description = song.description();
+                String fullDescription = description.getString();
 
-                    String[] split = fullDescription.split(" - ");
-                    if (split.length >= 2) {
-                        return new MusicMetadata(Component.literal(split[1]), Component.literal(split[0]));
-                    } else {
-                        return new MusicMetadata(description, Component.empty());
-                    }
+                String[] split = fullDescription.split(" - ");
+                if (split.length >= 2) {
+                    return new MusicMetadata(Component.literal(split[1]), Component.literal(split[0]));
+                } else {
+                    return new MusicMetadata(description, Component.empty());
                 }
             }
         }
-        return new MusicMetadata(disc.getDescription(), Component.empty());
+        return new MusicMetadata(disc.getDefaultInstance().getDisplayName(), Component.empty());
     }
 
     private static String beautifyName(String input) {
@@ -106,7 +102,7 @@ public class MusicHandler implements ResourceManagerReloadListener {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8))) {
                 JsonObject json = GsonHelper.parse(reader);
                 for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
-                    ResourceLocation id = ResourceLocation.parse(entry.getKey());
+                    Identifier id = Identifier.parse(entry.getKey());
                     JsonObject data = entry.getValue().getAsJsonObject();
 
                     String title = GsonHelper.getAsString(data, "title", "Unknown");
