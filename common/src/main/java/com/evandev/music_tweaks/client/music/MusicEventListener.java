@@ -15,8 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
-
 public class MusicEventListener implements SoundEventListener {
     private static final ResourceLocation MUSIC_NOTES = new ResourceLocation(Constants.MOD_ID, "textures/gui/music_notes.png");
 
@@ -60,22 +58,6 @@ public class MusicEventListener implements SoundEventListener {
 
     private RecordItem findDiscBySound(SoundInstance sound) {
         ResourceLocation playingLocation = sound.getLocation();
-
-        if (playingLocation.getNamespace().equals("etched")) {
-            try {
-                Object innerSound = sound.getSound();
-                if (innerSound.getClass().getName().equals("gg.moonflower.etched.api.sound.AbstractOnlineSoundInstance$OnlineSound")) {
-                    Method getUrlMethod = innerSound.getClass().getMethod("getURL");
-                    String url = (String) getUrlMethod.invoke(innerSound);
-
-                    if (url != null && !url.contains("://")) {
-                        playingLocation = new ResourceLocation(url);
-                    }
-                }
-            } catch (Exception e) {
-                Constants.LOG.warn("Failed to extract Etched sound URL", e);
-            }
-        }
 
         for (Item item : BuiltInRegistries.ITEM) {
             if (item instanceof RecordItem disc) {
