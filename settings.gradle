@@ -43,7 +43,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-rootProject.name = 'Mod-Template'
+rootProject.name = 'Mini-Music-Tweaks'
 include('common')
 include('fabric')
 include('neoforge')
