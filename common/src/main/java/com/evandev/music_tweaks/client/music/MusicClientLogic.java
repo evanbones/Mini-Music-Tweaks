@@ -2,17 +2,12 @@ package com.evandev.music_tweaks.client.music;
 
 import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.config.ModConfig;
-import com.evandev.music_tweaks.mixin.accessor.MusicManagerAccessor;
-import com.evandev.music_tweaks.mixin.accessor.SoundManagerAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.sounds.SoundEngine;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,11 +19,9 @@ import java.util.List;
 public class MusicClientLogic {
 
     private static MusicClientLogic INSTANCE;
-    private final float fadeRate = 1.0f / 40.0f;
     private CombatSoundInstance currentCombatMusic;
     private boolean inCombat = false;
     private int ticksSinceCombatUpdate = 0;
-    private float vanillaMusicMultiplier = 1.0f;
     private boolean wasHurtLastTick = false;
 
     private MusicClientLogic() {
@@ -45,8 +38,8 @@ public class MusicClientLogic {
         return sound == currentCombatMusic;
     }
 
-    public float getVanillaMusicMultiplier() {
-        return vanillaMusicMultiplier;
+    public boolean isInCombat() {
+        return inCombat;
     }
 
     public void onClientTick(Minecraft mc) {
@@ -79,31 +72,10 @@ public class MusicClientLogic {
             }
         }
 
-        boolean volumeChanged = false;
         if (inCombat) {
-            if (vanillaMusicMultiplier > 0.001f) {
-                SoundInstance currentVanillaMusic = ((MusicManagerAccessor) mc.getMusicManager()).getCurrentMusic();
-                if (currentVanillaMusic == null || !mc.getSoundManager().isActive(currentVanillaMusic)) {
-                    vanillaMusicMultiplier = 0.001f;
-                } else {
-                    vanillaMusicMultiplier -= fadeRate;
-                }
-
-                if (vanillaMusicMultiplier < 0.001f) vanillaMusicMultiplier = 0.001f;
-                volumeChanged = true;
-            } else if (currentCombatMusic == null || currentCombatMusic.isStopped()) {
+            if (currentCombatMusic == null || currentCombatMusic.isStopped()) {
                 startCombatMusic(mc, config);
             }
-        } else {
-            if (vanillaMusicMultiplier < 1.0f) {
-                vanillaMusicMultiplier += fadeRate;
-                if (vanillaMusicMultiplier > 1.0f) vanillaMusicMultiplier = 1.0f;
-                volumeChanged = true;
-            }
-        }
-
-        if (volumeChanged) {
-            updateVanillaVolumes(mc);
         }
     }
 
@@ -120,13 +92,6 @@ public class MusicClientLogic {
         if (currentCombatMusic != null) {
             currentCombatMusic.fadeOut();
         }
-    }
-
-    private void updateVanillaVolumes(Minecraft mc) {
-        SoundManager manager = mc.getSoundManager();
-        SoundEngine engine = ((SoundManagerAccessor) manager).getSoundEngine();
-        engine.updateCategoryVolume(SoundSource.MUSIC, 1.0f);
-        engine.updateCategoryVolume(SoundSource.RECORDS, 1.0f);
     }
 
     private int getEntities(LocalPlayer player) {

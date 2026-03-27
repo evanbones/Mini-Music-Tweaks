@@ -9,7 +9,6 @@
   "client": [
     "AbstractSoundInstanceWrapper",
     "SoundEngineJukeboxMixin",
-    "SoundEngineMixin",
     "SoundEngineWrapper",
     "SoundOptionsScreenMixin",
     "accessor.MusicManagerAccessor",
