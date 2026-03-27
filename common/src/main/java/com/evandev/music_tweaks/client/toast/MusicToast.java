@@ -2,14 +2,16 @@ package com.evandev.music_tweaks.client.toast;
 
 import com.evandev.music_tweaks.client.music.MusicHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.awt.*;
 
 public class MusicToast implements Toast {
     private final MusicHandler.MusicMetadata music;
@@ -37,14 +39,25 @@ public class MusicToast implements Toast {
         guiGraphics.blit(TEXTURE, 0, 0, 0, 0, this.width(), this.height());
 
         if (iconTexture != null) {
-            int iconSize = 20;
             int iconX = 8;
-            int iconY = 6;
+            int iconY = 8;
 
-            RenderSystem.setShaderTexture(0, iconTexture);
-            guiGraphics.blit(iconTexture, iconX, iconY, 0, 0, iconSize, iconSize, iconSize, iconSize);
+            long time = Util.getMillis();
+            int frame = (int) ((time / 100L) % 8L);
+            int vOffset = frame * 16;
+
+            float hue = (time % 6000L) / 6000.0f;
+            int color = Color.HSBtoRGB(hue, 1.0f, 1.0f);
+            float r = ((color >> 16) & 0xFF) / 255.0f;
+            float g = ((color >> 8) & 0xFF) / 255.0f;
+            float b = (color & 0xFF) / 255.0f;
+
+            RenderSystem.setShaderColor(r, g, b, 1.0F);
+            guiGraphics.blit(iconTexture, iconX, iconY, 0, vOffset, 16, 16, 16, 128);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+
         } else if (iconItem != null) {
-            toastComponent.getMinecraft().getItemRenderer().renderStatic(iconItem, ItemDisplayContext.GUI, -1, -1, guiGraphics.pose(), guiGraphics.bufferSource(), null, 8);
+            guiGraphics.renderFakeItem(iconItem, 8, 8);
         }
 
         int textLeft = 30;
