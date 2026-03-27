@@ -12,5 +12,17 @@
   "config.music_tweaks.decay_time.tooltip": "How long combat music will continue playing after no hostile mobs are nearby.",
 
   "config.music_tweaks.sounds": "Combat Music Sounds",
-  "config.music_tweaks.sounds.tooltip": "List of SoundEvent Resource Locations that can be chosen for combat music."
+  "config.music_tweaks.sounds.tooltip": "List of SoundEvent Resource Locations that can be chosen for combat music.",
+
+  "config.music_tweaks.music_frequency": "Music Frequency",
+  "config.music_tweaks.music_frequency.tooltip": "Controls how often vanilla background music plays. Default is normal.",
+
+  "config.music_tweaks.show_music_toast": "Show Music Toast",
+  "config.music_tweaks.show_music_toast.tooltip": "Displays a popup toast in the top right when a music track or disc starts playing.",
+
+  "config.music_tweaks.better_jukeboxes": "Better Jukeboxes",
+  "config.music_tweaks.better_jukeboxes.tooltip": "Fades out background music when near a playing Jukebox.",
+
+  "config.music_tweaks.jukebox_distance": "Jukebox Distance",
+  "config.music_tweaks.jukebox_distance.tooltip": "The radius in blocks around a jukebox that will fade out background music."
 }

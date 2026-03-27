@@ -1,6 +1,7 @@
 package com.evandev.music_tweaks.client.integration;
 
 import com.evandev.music_tweaks.config.ModConfig;
+import com.evandev.music_tweaks.config.MusicFrequency;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -45,6 +46,30 @@ public class ClothConfigIntegration {
                 .setDefaultValue(List.of("minecraft:music_disc.pigstep", "minecraft:music_disc.mellohi"))
                 .setTooltip(Component.translatable("config.music_tweaks.sounds.tooltip"))
                 .setSaveConsumer(newValue -> config.sounds = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startEnumSelector(Component.translatable("config.music_tweaks.music_frequency"), MusicFrequency.class, config.musicFrequency)
+                .setDefaultValue(MusicFrequency.DEFAULT)
+                .setTooltip(Component.translatable("config.music_tweaks.music_frequency.tooltip"))
+                .setSaveConsumer(newValue -> config.musicFrequency = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.show_music_toast"), config.showMusicToast)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.show_music_toast.tooltip"))
+                .setSaveConsumer(newValue -> config.showMusicToast = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.better_jukeboxes"), config.betterJukeboxes)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.better_jukeboxes.tooltip"))
+                .setSaveConsumer(newValue -> config.betterJukeboxes = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startDoubleField(Component.translatable("config.music_tweaks.jukebox_distance"), config.jukeboxDistance)
+                .setDefaultValue(64.0)
+                .setTooltip(Component.translatable("config.music_tweaks.jukebox_distance.tooltip"))
+                .setSaveConsumer(newValue -> config.jukeboxDistance = newValue)
                 .build());
 
         return builder.build();

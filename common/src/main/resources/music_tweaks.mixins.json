@@ -7,8 +7,11 @@
   "mixins": [
   ],
   "client": [
-    "ExampleMixin",
+    "AbstractSoundInstanceWrapper",
+    "SoundEngineJukeboxMixin",
     "SoundEngineMixin",
+    "SoundEngineWrapper",
+    "SoundOptionsScreenMixin",
     "accessor.MusicManagerAccessor",
     "accessor.SoundManagerAccessor"
   ],

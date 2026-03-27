@@ -25,10 +25,22 @@ public class ModConfig {
     public int minPursuitEntities = 3;
 
     @SerializedName("decay_time")
-    public int decayTime = 20;
+    public int decayTime = 3;
 
     @SerializedName("sounds")
     public List<String> sounds = new ArrayList<>(List.of("minecraft:music_disc.pigstep", "minecraft:music_disc.mellohi"));
+
+    @SerializedName("music_frequency")
+    public MusicFrequency musicFrequency = MusicFrequency.DEFAULT;
+
+    @SerializedName("show_music_toast")
+    public boolean showMusicToast = true;
+
+    @SerializedName("better_jukeboxes")
+    public boolean betterJukeboxes = true;
+
+    @SerializedName("jukebox_distance")
+    public double jukeboxDistance = 64.0;
 
     public static ModConfig get() {
         if (INSTANCE == null) {

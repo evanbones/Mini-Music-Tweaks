@@ -1,6 +1,6 @@
 package com.evandev.music_tweaks;
 
-import com.evandev.music_tweaks.client.ClientConfigSetup;
+import com.evandev.music_tweaks.client.MiniMusicTweaksClient;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -14,7 +14,7 @@ public class MiniMusicTweaks {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::commonSetup);
         if (FMLEnvironment.dist.isClient()) {
-            ClientConfigSetup.register(ModLoadingContext.get().getActiveContainer());
+            MiniMusicTweaksClient.register(ModLoadingContext.get().getActiveContainer(), modEventBus);
         }
     }
 

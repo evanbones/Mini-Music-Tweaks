@@ -149,7 +149,7 @@ public class MusicClientLogic {
         int idx = rand.nextInt(soundList.size());
         String soundStr = soundList.get(idx).trim();
 
-        ResourceLocation soundLocation = ResourceLocation.parse(soundStr);
+        ResourceLocation soundLocation = new ResourceLocation(soundStr);
         SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(soundLocation);
 
         if (sound == null) {
