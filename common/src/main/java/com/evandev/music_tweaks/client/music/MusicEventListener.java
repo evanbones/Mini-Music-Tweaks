@@ -18,7 +18,6 @@ import net.minecraft.world.item.JukeboxPlayable;
 import net.minecraft.world.item.JukeboxSong;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
 import java.util.Optional;
 
 public class MusicEventListener implements SoundEventListener {
@@ -64,22 +63,6 @@ public class MusicEventListener implements SoundEventListener {
 
     private Item findDiscBySound(SoundInstance sound) {
         ResourceLocation playingLocation = sound.getLocation();
-
-        if (playingLocation.getNamespace().equals("etched")) {
-            try {
-                Object innerSound = sound.getSound();
-                if (innerSound.getClass().getName().equals("gg.moonflower.etched.api.sound.AbstractOnlineSoundInstance$OnlineSound")) {
-                    Method getUrlMethod = innerSound.getClass().getMethod("getURL");
-                    String url = (String) getUrlMethod.invoke(innerSound);
-
-                    if (url != null && !url.contains("://")) {
-                        playingLocation = ResourceLocation.parse(url);
-                    }
-                }
-            } catch (Exception e) {
-                Constants.LOG.warn("Failed to extract Etched sound URL", e);
-            }
-        }
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) return null;
