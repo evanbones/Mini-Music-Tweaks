@@ -36,10 +36,28 @@ public class MusicHandler implements ResourceManagerReloadListener {
         }
 
         String path = location.getPath();
-        if (path.contains("/")) path = path.substring(path.lastIndexOf('/') + 1);
-        if (path.contains(".")) path = path.substring(0, path.lastIndexOf('.'));
 
-        return new MusicMetadata(Component.literal(beautifyName(path)), Component.empty());
+        if (path.endsWith(".ogg")) {
+            path = path.substring(0, path.length() - 4);
+        }
+
+        if (path.contains("/")) {
+            path = path.substring(path.lastIndexOf('/') + 1);
+        } else if (path.contains(".")) {
+            path = path.substring(path.lastIndexOf('.') + 1);
+        }
+
+        String translationKey = location.getNamespace() + "." + location.getPath();
+        Component translatedName = Component.translatable(translationKey);
+
+        Component titleComponent;
+        if (!translatedName.getString().equals(translationKey)) {
+            titleComponent = translatedName;
+        } else {
+            titleComponent = Component.literal(beautifyName(path));
+        }
+
+        return new MusicMetadata(titleComponent, Component.empty());
     }
 
     public static MusicMetadata getDiscInfo(Item disc) {

@@ -4,6 +4,7 @@ import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.client.music.MusicHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
@@ -15,27 +16,50 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 
 public class MusicToast implements Toast {
-    private static final ResourceLocation BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/music_toast_bg.png");
+    private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "toast/music_toast_bg");
 
-    private final MusicHandler.MusicMetadata music;
     private final ItemStack iconItem;
     private final ResourceLocation iconTexture;
+    private final Component displayText;
+    private final int width;
 
     public MusicToast(MusicHandler.MusicMetadata music, ItemStack icon) {
-        this.music = music;
         this.iconItem = icon;
         this.iconTexture = null;
+        this.displayText = buildText(music);
+        this.width = calculateWidth(this.displayText);
     }
 
     public MusicToast(MusicHandler.MusicMetadata music, ResourceLocation icon) {
-        this.music = music;
         this.iconItem = null;
         this.iconTexture = icon;
+        this.displayText = buildText(music);
+        this.width = calculateWidth(this.displayText);
+    }
+
+    private static Component buildText(MusicHandler.MusicMetadata music) {
+        boolean hasAuthor = !music.author().getString().isEmpty();
+        if (hasAuthor) {
+            return Component.literal(music.author().getString() + " - " + music.title().getString());
+        } else {
+            return music.title();
+        }
+    }
+
+    private static int calculateWidth(Component text) {
+        int textWidth = Minecraft.getInstance().font.width(text);
+        return Math.max(160, 30 + textWidth + 8);
+    }
+
+    @Override
+    public int width() {
+        return this.width;
     }
 
     @Override
     public @NotNull Visibility render(GuiGraphics guiGraphics, @NotNull ToastComponent toastComponent, long timeSinceLastVisible) {
-        guiGraphics.blit(BACKGROUND_TEXTURE, 0, 0, 0, 0, this.width(), this.height(), 160, 32);
+
+        guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width, this.height());
 
         if (iconTexture != null) {
             int iconX = 8;
@@ -59,17 +83,7 @@ public class MusicToast implements Toast {
             guiGraphics.renderFakeItem(iconItem, 8, 8);
         }
 
-        int textLeft = 30;
-        boolean hasAuthor = !music.author().getString().isEmpty();
-
-        Component displayText;
-        if (hasAuthor) {
-            displayText = Component.literal(music.author().getString() + " - " + music.title().getString());
-        } else {
-            displayText = music.title();
-        }
-
-        guiGraphics.drawString(toastComponent.getMinecraft().font, displayText, textLeft, 12, 0xFFFFFFFF);
+        guiGraphics.drawString(toastComponent.getMinecraft().font, this.displayText, 30, 12, 0xFFFFFFFF);
         return timeSinceLastVisible >= 5000L ? Visibility.HIDE : Visibility.SHOW;
     }
 }
