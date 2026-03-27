@@ -13,7 +13,7 @@
   },
   "license": "${license}",
   "icon": "${mod_id}.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "main": [
       "com.evandev.music_tweaks.MiniMusicTweaks"

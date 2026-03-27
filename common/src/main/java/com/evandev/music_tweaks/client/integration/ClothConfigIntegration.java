@@ -37,7 +37,7 @@ public class ClothConfigIntegration {
                 .build());
 
         general.addEntry(entryBuilder.startIntField(Component.translatable("config.music_tweaks.decay_time"), config.decayTime)
-                .setDefaultValue(20)
+                .setDefaultValue(3)
                 .setTooltip(Component.translatable("config.music_tweaks.decay_time.tooltip"))
                 .setSaveConsumer(newValue -> config.decayTime = newValue)
                 .build());
