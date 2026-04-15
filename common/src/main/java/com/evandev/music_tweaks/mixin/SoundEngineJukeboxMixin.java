@@ -4,6 +4,7 @@ import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.audio.Channel;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.sounds.SoundSource;
@@ -30,26 +31,29 @@ public abstract class SoundEngineJukeboxMixin {
     @Unique
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_IN = 1f / TICKS_TO_FULLY_FADE_IN;
     @Unique
-    private static final Map<SoundInstance, Vec3> coordinates = new HashMap<>();
+    private static final Map<SoundInstance, Vec3> musicTweaks$coordinates = new HashMap<>();
     @Unique
-    private final SoundEngineWrapper wrapper = (SoundEngineWrapper) this;
+    private final SoundEngineWrapper musicTweaks$wrapper = (SoundEngineWrapper) this;
 
     @Unique
-    private float currentMusicVolumeFactor = 1f;
+    private float musicTweaks$currentMusicVolumeFactor = 1f;
     @Unique
-    private float currentRecordVolumeFactor = 1f;
+    private float musicTweaks$currentRecordVolumeFactor = 1f;
     @Unique
-    private boolean wasMusicPaused = false;
+    private boolean musicTweaks$wasMusicPaused = false;
 
     @Inject(method = "play", at = @At("HEAD"))
-    private void injectPlay(SoundInstance sound, CallbackInfo ci) {
+    private void injectPlay(SoundInstance p_sound, CallbackInfo ci) {
         if (!ModConfig.get().betterJukeboxes) return;
 
-        if (sound.getSource() == SoundSource.RECORDS && sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
+        if (p_sound.getSource() == SoundSource.RECORDS &&
+                !(p_sound instanceof TickableSoundInstance) &&
+                p_sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
+
             modifiedSound.setRelative(true);
             modifiedSound.setAttenuationType(SoundInstance.Attenuation.NONE);
 
-            coordinates.put(sound, new Vec3(sound.getX(), sound.getY(), sound.getZ()));
+            musicTweaks$coordinates.put(p_sound, new Vec3(p_sound.getX(), p_sound.getY(), p_sound.getZ()));
             modifiedSound.setX(0);
             modifiedSound.setY(0);
             modifiedSound.setZ(0);
@@ -67,18 +71,18 @@ public abstract class SoundEngineJukeboxMixin {
         double maxDistanceSquared = maxDistance * maxDistance;
         double divisor = maxDistanceSquared - minDistanceSquared;
 
-        Collection<SoundInstance> records = wrapper.getInstanceBySource().get(SoundSource.RECORDS);
-        Vec3 playerPosition = wrapper.getListener().getTransform().position();
+        Collection<SoundInstance> records = musicTweaks$wrapper.getInstanceBySource().get(SoundSource.RECORDS);
+        Vec3 playerPosition = musicTweaks$wrapper.getListener().getTransform().position();
 
         long amountRecordsHearable = 0;
 
         for (SoundInstance sound : records) {
-            if (betterJukeboxes && coordinates.containsKey(sound)) {
-                double distanceSquared = playerPosition.distanceToSqr(coordinates.get(sound));
+            if (betterJukeboxes && musicTweaks$coordinates.containsKey(sound)) {
+                double distanceSquared = playerPosition.distanceToSqr(musicTweaks$coordinates.get(sound));
                 if (distanceSquared < maxDistanceSquared) {
                     amountRecordsHearable++;
                 }
-            } else if (!betterJukeboxes) {
+            } else {
                 amountRecordsHearable++;
             }
         }
@@ -89,35 +93,40 @@ public abstract class SoundEngineJukeboxMixin {
         float targetMusicVolume = (inCombat || hasHearableRecords) ? 0.0f : 1.0f;
 
         // Jukebox Fade
-        if (currentRecordVolumeFactor < targetRecordVolume) {
-            currentRecordVolumeFactor = Math.min(currentRecordVolumeFactor + MUSIC_VOLUME_PER_TICK_TO_FADE_IN, targetRecordVolume);
-        } else if (currentRecordVolumeFactor > targetRecordVolume) {
-            currentRecordVolumeFactor = Math.max(currentRecordVolumeFactor - MUSIC_VOLUME_PER_TICK_TO_FADE_OUT, targetRecordVolume);
+        if (musicTweaks$currentRecordVolumeFactor < targetRecordVolume) {
+            musicTweaks$currentRecordVolumeFactor = Math.min(musicTweaks$currentRecordVolumeFactor + MUSIC_VOLUME_PER_TICK_TO_FADE_IN, targetRecordVolume);
+        } else if (musicTweaks$currentRecordVolumeFactor > targetRecordVolume) {
+            musicTweaks$currentRecordVolumeFactor = Math.max(musicTweaks$currentRecordVolumeFactor - MUSIC_VOLUME_PER_TICK_TO_FADE_OUT, targetRecordVolume);
         }
 
         // Vanilla Music Fade
-        if (currentMusicVolumeFactor < targetMusicVolume) {
-            currentMusicVolumeFactor = Math.min(currentMusicVolumeFactor + MUSIC_VOLUME_PER_TICK_TO_FADE_IN, targetMusicVolume);
+        if (musicTweaks$currentMusicVolumeFactor < targetMusicVolume) {
+            musicTweaks$currentMusicVolumeFactor = Math.min(musicTweaks$currentMusicVolumeFactor + MUSIC_VOLUME_PER_TICK_TO_FADE_IN, targetMusicVolume);
             musicTweaks$setMusicVolumeAndHandlePausing();
-        } else if (currentMusicVolumeFactor > targetMusicVolume) {
-            currentMusicVolumeFactor = Math.max(currentMusicVolumeFactor - MUSIC_VOLUME_PER_TICK_TO_FADE_OUT, targetMusicVolume);
+        } else if (musicTweaks$currentMusicVolumeFactor > targetMusicVolume) {
+            musicTweaks$currentMusicVolumeFactor = Math.max(musicTweaks$currentMusicVolumeFactor - MUSIC_VOLUME_PER_TICK_TO_FADE_OUT, targetMusicVolume);
             musicTweaks$setMusicVolumeAndHandlePausing();
-        } else if (currentMusicVolumeFactor == 1.0f && wasMusicPaused) {
+        } else if (musicTweaks$currentMusicVolumeFactor == 1.0f && musicTweaks$wasMusicPaused) {
             musicTweaks$setMusicVolumeAndHandlePausing();
-        } else if (currentMusicVolumeFactor == 0.0f && !wasMusicPaused) {
+        } else if (musicTweaks$currentMusicVolumeFactor == 0.0f && !musicTweaks$wasMusicPaused) {
             musicTweaks$setMusicVolumeAndHandlePausing();
         }
 
         for (SoundInstance sound : records) {
-            ChannelAccess.ChannelHandle sourceManager = wrapper.getInstanceToChannel().get(sound);
+            ChannelAccess.ChannelHandle sourceManager = musicTweaks$wrapper.getInstanceToChannel().get(sound);
 
-            if (betterJukeboxes && coordinates.containsKey(sound)) {
-                double distanceSquared = playerPosition.distanceToSqr(coordinates.get(sound));
+            if (sourceManager == null) {
+                musicTweaks$coordinates.remove(sound);
+                continue;
+            }
+
+            if (betterJukeboxes && musicTweaks$coordinates.containsKey(sound)) {
+                double distanceSquared = playerPosition.distanceToSqr(musicTweaks$coordinates.get(sound));
                 double calculatedVolume = (maxDistanceSquared - distanceSquared) / divisor;
                 calculatedVolume = Math.max(0, Math.min(1, calculatedVolume));
 
-                float adjustedVolume = wrapper.calculateAdjustedVolume((float) calculatedVolume, SoundSource.RECORDS);
-                float finalVolume = adjustedVolume * currentRecordVolumeFactor;
+                float adjustedVolume = musicTweaks$wrapper.calculateAdjustedVolume((float) calculatedVolume, SoundSource.RECORDS);
+                float finalVolume = adjustedVolume * musicTweaks$currentRecordVolumeFactor;
 
                 sourceManager.execute(source -> source.setVolume(finalVolume));
 
@@ -126,43 +135,45 @@ public abstract class SoundEngineJukeboxMixin {
                 }
             } else {
                 float maxVolume = sound.getVolume();
-                float adjustedVolume = wrapper.calculateAdjustedVolume(maxVolume, SoundSource.RECORDS);
-                sourceManager.execute(source -> source.setVolume(adjustedVolume * currentRecordVolumeFactor));
+                float adjustedVolume = musicTweaks$wrapper.calculateAdjustedVolume(maxVolume, SoundSource.RECORDS);
+                sourceManager.execute(source -> source.setVolume(adjustedVolume * musicTweaks$currentRecordVolumeFactor));
             }
 
             if (sourceManager.isStopped()) {
-                coordinates.remove(sound);
+                musicTweaks$coordinates.remove(sound);
             }
         }
     }
 
     @Unique
     private void musicTweaks$setMusicVolumeAndHandlePausing() {
-        if (!wrapper.isLoaded()) return;
+        if (!musicTweaks$wrapper.isLoaded()) return;
 
-        Collection<SoundInstance> music = wrapper.getInstanceBySource().get(SoundSource.MUSIC);
+        Collection<SoundInstance> music = musicTweaks$wrapper.getInstanceBySource().get(SoundSource.MUSIC);
 
         for (SoundInstance sound : music) {
             if (MusicClientLogic.getInstance().isCombatSound(sound)) continue;
 
-            ChannelAccess.ChannelHandle sourceManager = wrapper.getInstanceToChannel().get(sound);
+            ChannelAccess.ChannelHandle sourceManager = musicTweaks$wrapper.getInstanceToChannel().get(sound);
+            if (sourceManager == null) continue;
+
             float maxVolume = sound.getVolume();
 
             sourceManager.execute(source -> {
-                source.setVolume(wrapper.calculateAdjustedVolume(maxVolume * currentMusicVolumeFactor, SoundSource.MUSIC));
+                source.setVolume(musicTweaks$wrapper.calculateAdjustedVolume(maxVolume * musicTweaks$currentMusicVolumeFactor, SoundSource.MUSIC));
 
-                if (currentMusicVolumeFactor <= 0 && !wasMusicPaused) {
+                if (musicTweaks$currentMusicVolumeFactor <= 0 && !musicTweaks$wasMusicPaused) {
                     sourceManager.execute(Channel::pause);
-                } else if (currentMusicVolumeFactor > 0 && wasMusicPaused) {
+                } else if (musicTweaks$currentMusicVolumeFactor > 0 && musicTweaks$wasMusicPaused) {
                     sourceManager.execute(Channel::unpause);
                 }
             });
         }
 
-        if (currentMusicVolumeFactor <= 0 && !wasMusicPaused) {
-            wasMusicPaused = true;
-        } else if (currentMusicVolumeFactor > 0 && wasMusicPaused) {
-            wasMusicPaused = false;
+        if (musicTweaks$currentMusicVolumeFactor <= 0 && !musicTweaks$wasMusicPaused) {
+            musicTweaks$wasMusicPaused = true;
+        } else if (musicTweaks$currentMusicVolumeFactor > 0 && musicTweaks$wasMusicPaused) {
+            musicTweaks$wasMusicPaused = false;
         }
     }
 }

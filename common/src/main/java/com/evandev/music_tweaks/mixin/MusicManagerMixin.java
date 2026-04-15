@@ -16,8 +16,8 @@ public class MusicManagerMixin {
             method = "tick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;nextInt(Lnet/minecraft/util/RandomSource;II)I")
     )
-    private int musicTweaks$modifySongDelay(RandomSource random, int min, int max, Operation<Integer> original) {
-        int vanillaDelay = original.call(random, min, max);
+    private int musicTweaks$modifySongDelay(RandomSource random, int minimum, int maximum, Operation<Integer> original) {
+        int vanillaDelay = original.call(random, minimum, maximum);
 
         MusicFrequency frequency = ModConfig.get().musicFrequency;
 
