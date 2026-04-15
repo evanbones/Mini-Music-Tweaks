@@ -11,9 +11,7 @@
     "MusicManagerMixin",
     "SoundEngineJukeboxMixin",
     "SoundEngineWrapper",
-    "SoundOptionsScreenMixin",
-    "accessor.MusicManagerAccessor",
-    "accessor.SoundManagerAccessor"
+    "SoundOptionsScreenMixin"
   ],
   "server": [],
   "injectors": {
