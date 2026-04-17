@@ -1,12 +1,15 @@
 package com.evandev.music_tweaks.mixin;
 
+import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.audio.Channel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,12 +45,27 @@ public abstract class SoundEngineJukeboxMixin {
     @Unique
     private boolean musicTweaks$wasMusicPaused = false;
 
-    @Inject(method = "play", at = @At("HEAD"))
+    @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance p_sound, CallbackInfo ci) {
+        if (p_sound.getSource() == SoundSource.RECORDS) {
+            if (!JukeboxOffsetState.isOurSound(p_sound)) {
+                ci.cancel();
+                BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
+                Minecraft client = Minecraft.getInstance();
+                if (client.level != null && client.getConnection() != null) {
+                    if (!JukeboxOffsetState.hasActiveSound(blockPos) &&
+                            !JukeboxOffsetState.hasPendingQuery(blockPos)) {
+                        int transactionId = JukeboxOffsetState.registerQuery(blockPos);
+                        client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                    }
+                }
+                return;
+            }
+        }
+
         if (!ModConfig.get().betterJukeboxes) return;
 
         if (p_sound.getSource() == SoundSource.RECORDS &&
-                !(p_sound instanceof TickableSoundInstance) &&
                 p_sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
 
             modifiedSound.setRelative(true);
@@ -61,7 +79,7 @@ public abstract class SoundEngineJukeboxMixin {
     }
 
     @Inject(method = "tick(Z)V", at = @At("HEAD"))
-    private void injectTick(boolean isPaused, CallbackInfo ci) {
+    private void injectTick(boolean paused, CallbackInfo ci) {
         boolean inCombat = MusicClientLogic.getInstance().isInCombat();
         boolean betterJukeboxes = ModConfig.get().betterJukeboxes;
 
