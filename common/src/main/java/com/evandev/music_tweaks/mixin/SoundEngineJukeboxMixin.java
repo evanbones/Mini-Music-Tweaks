@@ -6,7 +6,6 @@ import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.audio.Channel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.BlockPos;
@@ -71,7 +70,6 @@ public abstract class SoundEngineJukeboxMixin {
         if (!ModConfig.get().betterJukeboxes) return;
 
         if (p_sound.getSource() == SoundSource.RECORDS &&
-                !(p_sound instanceof TickableSoundInstance) &&
                 p_sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
 
             modifiedSound.setRelative(true);
