@@ -1,4 +1,3 @@
-### Fixed
+### Added
 
-- Fixed crash with Caverns and Chasms discs.
-- Fixed Polyppies from End's Phantasm not playing music.
+- Added a fix for MC-10436 (Jukeboxes stop playing after relogging/reloading world).

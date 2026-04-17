@@ -4,7 +4,6 @@ import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.audio.Channel;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.client.resources.sounds.TickableSoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.sounds.SoundSource;
@@ -43,12 +42,27 @@ public abstract class SoundEngineJukeboxMixin {
     @Unique
     private boolean musicTweaks$wasMusicPaused = false;
 
-    @Inject(method = "play", at = @At("HEAD"))
+    @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance instance, CallbackInfoReturnable<SoundEngine.PlayResult> cir) {
+        if (instance.getSource() == SoundSource.RECORDS) {
+            if (!com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.isOurSound(instance)) {
+                cir.cancel();
+                net.minecraft.core.BlockPos blockPos = net.minecraft.core.BlockPos.containing(instance.getX(), instance.getY(), instance.getZ());
+                net.minecraft.client.Minecraft client = net.minecraft.client.Minecraft.getInstance();
+                if (client.level != null && client.getConnection() != null) {
+                    if (!com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.hasActiveSound(blockPos) &&
+                            !com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.hasPendingQuery(blockPos)) {
+                        int transactionId = com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.registerQuery(blockPos);
+                        client.getConnection().send(new net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                    }
+                }
+                return;
+            }
+        }
+
         if (!ModConfig.get().general.betterJukeboxes.value()) return;
 
         if (instance.getSource() == SoundSource.RECORDS &&
-                !(instance instanceof TickableSoundInstance) &&
                 instance instanceof AbstractSoundInstanceWrapper modifiedSound) {
 
             modifiedSound.setRelative(true);
