@@ -49,7 +49,11 @@ public abstract class SoundEngineJukeboxMixin {
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance p_sound, CallbackInfo ci) {
         if (p_sound.getSource() == SoundSource.RECORDS) {
-            if (!JukeboxOffsetState.isOurSound(p_sound)) {
+
+            if (p_sound.isLooping()) {
+                BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
+                JukeboxOffsetState.trackSound(blockPos, p_sound);
+            } else if (!JukeboxOffsetState.isOurSound(p_sound)) {
                 ci.cancel();
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 Minecraft client = Minecraft.getInstance();
