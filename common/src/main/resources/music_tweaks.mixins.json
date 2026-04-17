@@ -8,7 +8,10 @@
   ],
   "client": [
     "AbstractSoundInstanceWrapper",
+    "ClientLevelJukeboxMixin",
+    "ClientPacketListenerJukeboxMixin",
     "MusicManagerMixin",
+    "SoundBufferLibraryMixin",
     "SoundEngineJukeboxMixin",
     "SoundEngineWrapper",
     "SoundOptionsScreenMixin"
