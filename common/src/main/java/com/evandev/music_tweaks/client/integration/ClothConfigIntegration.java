@@ -72,6 +72,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> config.jukeboxDistance = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.permanent_toast_in_options"), config.permanentToastInOptions)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.permanent_toast_in_options.tooltip"))
+                .setSaveConsumer(newValue -> config.permanentToastInOptions = newValue)
+                .build());
+
         return builder.build();
     }
 }

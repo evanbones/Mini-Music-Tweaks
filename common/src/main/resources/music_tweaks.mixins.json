@@ -9,11 +9,13 @@
     "AbstractSoundInstanceWrapper",
     "ClientLevelJukeboxMixin",
     "ClientPacketListenerJukeboxMixin",
+    "MinecraftScreenMixin",
     "MusicManagerMixin",
     "SoundBufferLibraryMixin",
     "SoundEngineJukeboxMixin",
     "SoundEngineWrapper",
-    "SoundOptionsScreenMixin"
+    "SoundOptionsScreenMixin",
+    "ToastInstanceMixin"
   ],
   "server": [],
   "injectors": {

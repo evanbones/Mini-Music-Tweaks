@@ -24,5 +24,8 @@
   "config.music_tweaks.better_jukeboxes.tooltip": "Fades out background music when near a playing Jukebox.",
 
   "config.music_tweaks.jukebox_distance": "Jukebox Distance",
-  "config.music_tweaks.jukebox_distance.tooltip": "The radius in blocks around a jukebox that will fade out background music."
+  "config.music_tweaks.jukebox_distance.tooltip": "The radius in blocks around a jukebox that will fade out background music.",
+
+  "config.music_tweaks.permanent_toast_in_options": "Permanent Toast in Options",
+  "config.music_tweaks.permanent_toast_in_options.tooltip": "Keeps the music toast continuously displayed on screen while navigating the options menus."
 }

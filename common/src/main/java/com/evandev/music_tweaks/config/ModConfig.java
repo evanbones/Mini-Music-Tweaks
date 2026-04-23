@@ -42,6 +42,9 @@ public class ModConfig {
     @SerializedName("jukebox_distance")
     public double jukeboxDistance = 64.0;
 
+    @SerializedName("permanent_toast_in_options")
+    public boolean permanentToastInOptions = true;
+
     public static ModConfig get() {
         if (INSTANCE == null) {
             load();

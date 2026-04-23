@@ -2,12 +2,17 @@ package com.evandev.music_tweaks.client.toast;
 
 import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.client.music.MusicHandler;
+import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.options.OptionsScreen;
+import net.minecraft.client.gui.screens.options.OptionsSubScreen;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -16,25 +21,53 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 
 public class MusicToast implements Toast {
+    public static final Object TOKEN = new Object();
     private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "toast/music_toast_bg");
+    private static MusicToast currentToast;
 
     private final ItemStack iconItem;
     private final ResourceLocation iconTexture;
     private final Component displayText;
     private final int width;
 
-    public MusicToast(MusicHandler.MusicMetadata music, ItemStack icon) {
+    private final SoundInstance soundInstance;
+    private final long startTime;
+
+    private boolean forceSnapHidden = false;
+    private boolean wasMenuOpen = false;
+
+    public MusicToast(MusicHandler.MusicMetadata music, ItemStack icon, SoundInstance soundInstance) {
         this.iconItem = icon;
         this.iconTexture = null;
         this.displayText = buildText(music);
         this.width = calculateWidth(this.displayText);
+        this.soundInstance = soundInstance;
+        this.startTime = Util.getMillis();
+        currentToast = this;
     }
 
-    public MusicToast(MusicHandler.MusicMetadata music, ResourceLocation icon) {
+    public MusicToast(MusicHandler.MusicMetadata music, ResourceLocation icon, SoundInstance soundInstance) {
         this.iconItem = null;
         this.iconTexture = icon;
         this.displayText = buildText(music);
         this.width = calculateWidth(this.displayText);
+        this.soundInstance = soundInstance;
+        this.startTime = Util.getMillis();
+        currentToast = this;
+    }
+
+    public static void resurrectIfPlaying() {
+        if (currentToast != null) {
+            if (Minecraft.getInstance().getSoundManager().isActive(currentToast.soundInstance)) {
+                ToastComponent toasts = Minecraft.getInstance().getToasts();
+                if (toasts.getToast(MusicToast.class, TOKEN) == null) {
+                    currentToast.forceSnapHidden = false;
+                    toasts.addToast(currentToast);
+                }
+            } else {
+                currentToast = null;
+            }
+        }
     }
 
     private static Component buildText(MusicHandler.MusicMetadata music) {
@@ -52,23 +85,49 @@ public class MusicToast implements Toast {
     }
 
     @Override
+    public int height() {
+        return 30;
+    }
+
+    @Override
+    public @NotNull Object getToken() {
+        return TOKEN;
+    }
+
+    public boolean isMenuOpen() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.screen instanceof PauseScreen ||
+                mc.screen instanceof OptionsScreen ||
+                mc.screen instanceof OptionsSubScreen;
+    }
+
+    public boolean shouldBeSilent() {
+        return ModConfig.get().permanentToastInOptions && (isMenuOpen() || this.forceSnapHidden);
+    }
+
+    public boolean shouldSnapVisible() {
+        return ModConfig.get().permanentToastInOptions && isMenuOpen();
+    }
+
+    public boolean shouldSnapHidden() {
+        return ModConfig.get().permanentToastInOptions && this.forceSnapHidden;
+    }
+
+    @Override
     public int width() {
         return this.width;
     }
 
     @Override
     public @NotNull Visibility render(GuiGraphics guiGraphics, @NotNull ToastComponent toastComponent, long timeSinceLastVisible) {
-
         guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width, this.height());
 
         if (iconTexture != null) {
             int iconX = 8;
             int iconY = 8;
-
             long time = Util.getMillis();
             int frame = (int) ((time / 100L) % 8L);
             int vOffset = frame * 16;
-
             float hue = (time % 6000L) / 6000.0f;
             int color = Color.HSBtoRGB(hue, 1.0f, 1.0f);
             float r = ((color >> 16) & 0xFF) / 255.0f;
@@ -78,12 +137,26 @@ public class MusicToast implements Toast {
             RenderSystem.setShaderColor(r, g, b, 1.0F);
             guiGraphics.blit(iconTexture, iconX, iconY, 0, vOffset, 16, 16, 16, 128);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
         } else if (iconItem != null) {
             guiGraphics.renderFakeItem(iconItem, 8, 8);
         }
 
         guiGraphics.drawString(toastComponent.getMinecraft().font, this.displayText, 30, 12, 0xFFFFFFFF);
-        return timeSinceLastVisible >= 5000L ? Visibility.HIDE : Visibility.SHOW;
+
+        boolean currentMenuOpen = isMenuOpen();
+        long elapsed = Util.getMillis() - this.startTime;
+
+        if (ModConfig.get().permanentToastInOptions) {
+            if (!currentMenuOpen && this.wasMenuOpen && elapsed >= 5000L) {
+                this.forceSnapHidden = true;
+            }
+            this.wasMenuOpen = currentMenuOpen;
+
+            if (currentMenuOpen) {
+                return Visibility.SHOW;
+            }
+        }
+
+        return elapsed >= 5000L ? Visibility.HIDE : Visibility.SHOW;
     }
 }

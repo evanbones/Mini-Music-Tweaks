@@ -45,19 +45,17 @@ public class MusicEventListener implements SoundEventListener {
 
         if (sound.getSource() == SoundSource.RECORDS) {
             Item discItem = findDiscBySound(sound);
-
-            if (discItem == null) {
-                return;
-            }
+            if (discItem == null) return;
 
             ItemStack icon = new ItemStack(discItem);
             MusicHandler.MusicMetadata metadata = MusicHandler.getDiscInfo(discItem);
 
-            mc.getToasts().addToast(new MusicToast(metadata, icon));
+            mc.getToasts().addToast(new MusicToast(metadata, icon, sound));
 
         } else {
             MusicHandler.MusicMetadata metadata = MusicHandler.getMusicInfo(sound.getSound().getLocation());
-            mc.getToasts().addToast(new MusicToast(metadata, MUSIC_NOTES));
+
+            mc.getToasts().addToast(new MusicToast(metadata, MUSIC_NOTES, sound));
         }
     }
 
