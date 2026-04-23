@@ -15,6 +15,9 @@ public final class JukeboxOffsetState {
     private static final AtomicInteger TRANSACTION_COUNTER = new AtomicInteger(0);
     private static final Set<BlockPos> QUERIED_POSITIONS = ConcurrentHashMap.newKeySet();
 
+    private static final Set<BlockPos> CUSTOM_QUERIES = ConcurrentHashMap.newKeySet();
+    private static final Set<BlockPos> UNSUPPORTED_POSITIONS = ConcurrentHashMap.newKeySet();
+
     private JukeboxOffsetState() {
     }
 
@@ -57,12 +60,30 @@ public final class JukeboxOffsetState {
         return pos;
     }
 
+    public static void registerCustomQuery(BlockPos pos) {
+        CUSTOM_QUERIES.add(pos);
+    }
+
+    public static void resolveCustomQuery(BlockPos pos) {
+        CUSTOM_QUERIES.remove(pos);
+    }
+
+    public static void markUnsupported(BlockPos pos) {
+        UNSUPPORTED_POSITIONS.add(pos);
+    }
+
+    public static boolean isUnsupported(BlockPos pos) {
+        return UNSUPPORTED_POSITIONS.contains(pos);
+    }
+
     public static boolean hasPendingQuery(BlockPos pos) {
-        return QUERIED_POSITIONS.contains(pos);
+        return QUERIED_POSITIONS.contains(pos) || CUSTOM_QUERIES.contains(pos);
     }
 
     public static void cancelQuery(BlockPos pos) {
         QUERIED_POSITIONS.remove(pos);
+        CUSTOM_QUERIES.remove(pos);
+        UNSUPPORTED_POSITIONS.remove(pos);
         PENDING_QUERIES.entrySet().removeIf(e -> e.getValue().equals(pos));
     }
 }

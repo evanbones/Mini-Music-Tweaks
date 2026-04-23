@@ -1,5 +1,7 @@
 package com.evandev.music_tweaks.platform.services;
 
+import net.minecraft.core.BlockPos;
+
 import java.nio.file.Path;
 
 public interface IPlatformHelper {
@@ -48,4 +50,14 @@ public interface IPlatformHelper {
      * @return True if on the client, false if on a dedicated server.
      */
     boolean isPhysicalClient();
+
+    /**
+     * Checks if the server we are currently connected to has this mod installed.
+     */
+    boolean isModLoadedOnServer();
+
+    /**
+     * Sends the custom jukebox sync request to the server.
+     */
+    void sendJukeboxSyncRequest(BlockPos pos);
 }

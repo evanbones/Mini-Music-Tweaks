@@ -3,6 +3,7 @@ package com.evandev.music_tweaks.mixin;
 import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
+import com.evandev.music_tweaks.platform.Services;
 import com.mojang.blaze3d.audio.Channel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -58,9 +59,18 @@ public abstract class SoundEngineJukeboxMixin {
                 Minecraft client = Minecraft.getInstance();
                 if (client.level != null && client.getConnection() != null) {
                     if (!JukeboxOffsetState.hasActiveSound(blockPos) &&
-                            !JukeboxOffsetState.hasPendingQuery(blockPos)) {
-                        int transactionId = JukeboxOffsetState.registerQuery(blockPos);
-                        client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                            !JukeboxOffsetState.hasPendingQuery(blockPos) &&
+                            !JukeboxOffsetState.isUnsupported(blockPos)) {
+
+                        if (Services.PLATFORM.isModLoadedOnServer()) {
+                            JukeboxOffsetState.registerCustomQuery(blockPos);
+                            Services.PLATFORM.sendJukeboxSyncRequest(blockPos);
+                        } else if (client.player != null && client.player.hasPermissions(2)) {
+                            int transactionId = JukeboxOffsetState.registerQuery(blockPos);
+                            client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                        } else {
+                            JukeboxOffsetState.markUnsupported(blockPos);
+                        }
                     }
                 }
                 return;

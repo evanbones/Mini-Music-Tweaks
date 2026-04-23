@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with Quark Ambience discs.
+- Added optional server-side integration to fix permissions issues with Jukeboxes.

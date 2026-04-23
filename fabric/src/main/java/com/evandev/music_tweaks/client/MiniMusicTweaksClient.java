@@ -1,12 +1,16 @@
 package com.evandev.music_tweaks.client;
 
 import com.evandev.music_tweaks.Constants;
+import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
+import com.evandev.music_tweaks.client.jukebox.JukeboxSyncHandler;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.client.music.MusicEventListener;
 import com.evandev.music_tweaks.client.music.MusicHandler;
+import com.evandev.music_tweaks.network.JukeboxSyncResponsePayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -45,6 +49,13 @@ public class MiniMusicTweaksClient implements ClientModInitializer {
 
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
             client.getSoundManager().addListener(new MusicEventListener());
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(JukeboxSyncResponsePayload.ID, (payload, context) -> {
+            context.client().execute(() -> {
+                JukeboxOffsetState.resolveCustomQuery(payload.pos());
+                JukeboxSyncHandler.playSyncedSong(payload.pos(), payload.ticksSinceStart(), payload.recordItem());
+            });
         });
     }
 }

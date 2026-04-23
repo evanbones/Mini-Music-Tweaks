@@ -2,6 +2,7 @@ package com.evandev.music_tweaks.mixin;
 
 import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
 import com.evandev.music_tweaks.client.jukebox.OffsetSoundInstance;
+import com.evandev.music_tweaks.platform.Services;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -75,12 +76,21 @@ public class ClientLevelJukeboxMixin {
                                 double dz = pos.getZ() + 0.5D - pz;
                                 if (dx * dx + dy * dy + dz * dz <= SCAN_RADIUS_SQ
                                         && !JukeboxOffsetState.hasActiveSound(pos)
-                                        && !JukeboxOffsetState.hasPendingQuery(pos)) {
+                                        && !JukeboxOffsetState.hasPendingQuery(pos)
+                                        && !JukeboxOffsetState.isUnsupported(pos)) {
 
                                     BlockState blockState = level.getBlockState(pos);
                                     if (blockState.hasProperty(JukeboxBlock.HAS_RECORD) && blockState.getValue(JukeboxBlock.HAS_RECORD)) {
-                                        int transactionId = JukeboxOffsetState.registerQuery(pos);
-                                        client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, pos));
+
+                                        if (Services.PLATFORM.isModLoadedOnServer()) {
+                                            JukeboxOffsetState.registerCustomQuery(pos);
+                                            Services.PLATFORM.sendJukeboxSyncRequest(pos);
+                                        } else if (client.player.hasPermissions(2)) {
+                                            int transactionId = JukeboxOffsetState.registerQuery(pos);
+                                            client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, pos));
+                                        } else {
+                                            JukeboxOffsetState.markUnsupported(pos);
+                                        }
                                     }
                                 }
                             }
