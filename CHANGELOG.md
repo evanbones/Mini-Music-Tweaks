@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-05-02
+
+### Fixed
+
+- Fixed incompatibility with Create: Sounds of Steam and Additional Additions.
+- Small fixes to the pause menu music toast.
+
+### [1.3.0] - 2026-04-22
+
+### Added
+
+- Added option to keep the music toast displayed in the options menu.
+
+### Fixed
+
+- Added optional server-side integration to fix permissions issues with Jukeboxes.
+
 ## [1.2.1] - 2026-04-17
 
 ### Fixed

@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Optional;
 
 public class JukeboxSyncHandler {
-
     public static void playSyncedSong(BlockPos pos, long ticksSinceStart, ItemStack recordItem) {
         Minecraft client = Minecraft.getInstance();
         client.execute(() -> {
@@ -31,6 +30,7 @@ public class JukeboxSyncHandler {
                         Optional<Holder<JukeboxSong>> songEntry = JukeboxSong.fromStack(world.registryAccess(), recordItem);
 
                         if (songEntry.isPresent()) {
+                            JukeboxOffsetState.removeCancelledSound(pos);
                             SoundEvent soundEvent = songEntry.get().value().soundEvent().value();
                             TagKey<JukeboxSong> ambientTag = TagKey.create(Registries.JUKEBOX_SONG, ResourceLocation.parse("quark:ambient"));
 
@@ -46,15 +46,32 @@ public class JukeboxSyncHandler {
                                 OffsetSoundInstance instance = new OffsetSoundInstance(
                                         soundEvent, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D
                                 );
-
                                 JukeboxOffsetState.markOurSound(instance);
                                 PendingStreamOffset.set(offsetSeconds);
                                 client.getSoundManager().play(instance);
                                 JukeboxOffsetState.trackSound(pos, instance);
                             }
+                        } else {
+                            playFallback(pos);
                         }
+                    } else {
+                        JukeboxOffsetState.removeCancelledSound(pos);
                     }
+                } else {
+                    JukeboxOffsetState.removeCancelledSound(pos);
                 }
+            }
+        });
+    }
+
+    public static void playFallback(BlockPos pos) {
+        Minecraft client = Minecraft.getInstance();
+        client.execute(() -> {
+            SoundInstance original = JukeboxOffsetState.getAndRemoveCancelledSound(pos);
+            if (original != null) {
+                JukeboxOffsetState.markOurSound(original);
+                client.getSoundManager().play(original);
+                JukeboxOffsetState.trackSound(pos, original);
             }
         });
     }

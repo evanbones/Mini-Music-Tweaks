@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerJukeboxMixin {
-
     @Inject(method = "handleTagQueryPacket", at = @At("HEAD"), cancellable = true)
     private void jukeboxSync_onNbtQueryResponse(ClientboundTagQueryPacket packet, CallbackInfo ci) {
         int transactionId = packet.getTransactionId();
@@ -29,16 +28,17 @@ public class ClientPacketListenerJukeboxMixin {
             if (nbt != null) {
                 long ticksSinceStart = nbt.getLong("ticks_since_song_started");
                 CompoundTag recordNbt = nbt.getCompound("RecordItem");
-
                 if (!recordNbt.isEmpty()) {
                     Minecraft client = Minecraft.getInstance();
                     Optional<ItemStack> recordItemOpt = ItemStack.parse(client.level.registryAccess(), recordNbt);
-
                     if (recordItemOpt.isPresent() && !recordItemOpt.get().isEmpty()) {
                         JukeboxSyncHandler.playSyncedSong(pos, ticksSinceStart, recordItemOpt.get());
+                        return;
                     }
                 }
             }
+
+            JukeboxSyncHandler.playFallback(pos);
         }
     }
 }

@@ -1,7 +1,4 @@
-### Added
-
-- Added option to keep the music toast displayed in the options menu.
-
 ### Fixed
 
-- Added optional server-side integration to fix permissions issues with Jukeboxes.
+- Fixed incompatibility with Create: Sounds of Steam and Additional Additions.
+- Small fixes to the pause menu music toast.

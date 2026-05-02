@@ -1,11 +1,14 @@
 package com.evandev.music_tweaks.mixin;
 
 import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
+import com.evandev.music_tweaks.client.jukebox.JukeboxSyncHandler;
+import com.evandev.music_tweaks.client.jukebox.OffsetSoundInstance;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
 import com.evandev.music_tweaks.platform.Services;
 import com.mojang.blaze3d.audio.Channel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
@@ -25,7 +28,6 @@ import java.util.Map;
 
 @Mixin(SoundEngine.class)
 public abstract class SoundEngineJukeboxMixin {
-
     @Unique
     private static final int TICKS_TO_FULLY_FADE_OUT = 20;
     @Unique
@@ -34,11 +36,12 @@ public abstract class SoundEngineJukeboxMixin {
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_OUT = 1f / TICKS_TO_FULLY_FADE_OUT;
     @Unique
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_IN = 1f / TICKS_TO_FULLY_FADE_IN;
+
     @Unique
     private static final Map<SoundInstance, Vec3> musicTweaks$coordinates = new HashMap<>();
+
     @Unique
     private final SoundEngineWrapper musicTweaks$wrapper = (SoundEngineWrapper) this;
-
     @Unique
     private float musicTweaks$currentMusicVolumeFactor = 1f;
     @Unique
@@ -48,43 +51,51 @@ public abstract class SoundEngineJukeboxMixin {
 
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance p_sound, CallbackInfo ci) {
-        if (p_sound.getSource() == SoundSource.RECORDS) {
+        boolean isOurSound = JukeboxOffsetState.isOurSound(p_sound);
 
+        if (p_sound.getSource() == SoundSource.RECORDS) {
             if (p_sound.isLooping()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 JukeboxOffsetState.trackSound(blockPos, p_sound);
-            } else if (!JukeboxOffsetState.isOurSound(p_sound)) {
-                ci.cancel();
+            } else if (!isOurSound && p_sound instanceof SimpleSoundInstance && !p_sound.isRelative()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 Minecraft client = Minecraft.getInstance();
-                if (client.level != null && client.getConnection() != null) {
-                    if (!JukeboxOffsetState.hasActiveSound(blockPos) &&
-                            !JukeboxOffsetState.hasPendingQuery(blockPos) &&
-                            !JukeboxOffsetState.isUnsupported(blockPos)) {
 
-                        if (Services.PLATFORM.isModLoadedOnServer()) {
-                            JukeboxOffsetState.registerCustomQuery(blockPos);
-                            Services.PLATFORM.sendJukeboxSyncRequest(blockPos);
-                        } else if (client.player != null && client.player.hasPermissions(2)) {
-                            int transactionId = JukeboxOffsetState.registerQuery(blockPos);
-                            client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                if (client.level != null && client.getConnection() != null) {
+                    if (!JukeboxOffsetState.isUnsupported(blockPos)) {
+                        if (!JukeboxOffsetState.hasActiveSound(blockPos) && !JukeboxOffsetState.hasPendingQuery(blockPos)) {
+                            ci.cancel();
+                            JukeboxOffsetState.addCancelledSound(blockPos, p_sound);
+
+                            if (Services.PLATFORM.isModLoadedOnServer()) {
+                                JukeboxOffsetState.registerCustomQuery(blockPos);
+                                Services.PLATFORM.sendJukeboxSyncRequest(blockPos);
+                            } else if (client.player != null && client.player.hasPermissions(2)) {
+                                int transactionId = JukeboxOffsetState.registerQuery(blockPos);
+                                client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                            } else {
+                                JukeboxOffsetState.markUnsupported(blockPos);
+                                JukeboxSyncHandler.playFallback(blockPos);
+                            }
                         } else {
-                            JukeboxOffsetState.markUnsupported(blockPos);
+                            ci.cancel();
                         }
+                        return;
                     }
                 }
-                return;
             }
         }
 
         if (!ModConfig.get().betterJukeboxes) return;
 
-        if (p_sound.getSource() == SoundSource.RECORDS &&
-                p_sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
+        boolean isSafeToModify = isOurSound ||
+                p_sound instanceof SimpleSoundInstance ||
+                p_sound instanceof OffsetSoundInstance;
 
+        if (isSafeToModify && p_sound.getSource() == SoundSource.RECORDS &&
+                p_sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
             modifiedSound.setRelative(true);
             modifiedSound.setAttenuationType(SoundInstance.Attenuation.NONE);
-
             musicTweaks$coordinates.put(p_sound, new Vec3(p_sound.getX(), p_sound.getY(), p_sound.getZ()));
             modifiedSound.setX(0);
             modifiedSound.setY(0);
@@ -96,7 +107,6 @@ public abstract class SoundEngineJukeboxMixin {
     private void injectTick(boolean paused, CallbackInfo ci) {
         boolean inCombat = MusicClientLogic.getInstance().isInCombat();
         boolean betterJukeboxes = ModConfig.get().betterJukeboxes;
-
         double maxDistance = ModConfig.get().jukeboxDistance;
         double minDistance = maxDistance * 0.25;
         double minDistanceSquared = minDistance * minDistance;
@@ -105,7 +115,6 @@ public abstract class SoundEngineJukeboxMixin {
 
         Collection<SoundInstance> records = musicTweaks$wrapper.getInstanceBySource().get(SoundSource.RECORDS);
         Vec3 playerPosition = musicTweaks$wrapper.getListener().getTransform().position();
-
         long amountRecordsHearable = 0;
 
         for (SoundInstance sound : records) {
@@ -120,6 +129,7 @@ public abstract class SoundEngineJukeboxMixin {
         }
 
         boolean hasHearableRecords = amountRecordsHearable > 0;
+        JukeboxOffsetState.setRecordHearable(hasHearableRecords);
 
         float targetRecordVolume = inCombat ? 0.0f : 1.0f;
         float targetMusicVolume = (inCombat || hasHearableRecords) ? 0.0f : 1.0f;
@@ -146,7 +156,6 @@ public abstract class SoundEngineJukeboxMixin {
 
         for (SoundInstance sound : records) {
             ChannelAccess.ChannelHandle sourceManager = musicTweaks$wrapper.getInstanceToChannel().get(sound);
-
             if (sourceManager == null) {
                 musicTweaks$coordinates.remove(sound);
                 continue;
@@ -156,10 +165,8 @@ public abstract class SoundEngineJukeboxMixin {
                 double distanceSquared = playerPosition.distanceToSqr(musicTweaks$coordinates.get(sound));
                 double calculatedVolume = (maxDistanceSquared - distanceSquared) / divisor;
                 calculatedVolume = Math.max(0, Math.min(1, calculatedVolume));
-
                 float adjustedVolume = musicTweaks$wrapper.calculateAdjustedVolume((float) calculatedVolume, SoundSource.RECORDS);
                 float finalVolume = adjustedVolume * musicTweaks$currentRecordVolumeFactor;
-
                 sourceManager.execute(source -> source.setVolume(finalVolume));
 
                 if (sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
@@ -182,7 +189,6 @@ public abstract class SoundEngineJukeboxMixin {
         if (!musicTweaks$wrapper.isLoaded()) return;
 
         Collection<SoundInstance> music = musicTweaks$wrapper.getInstanceBySource().get(SoundSource.MUSIC);
-
         for (SoundInstance sound : music) {
             if (MusicClientLogic.getInstance().isCombatSound(sound)) continue;
 
@@ -190,10 +196,8 @@ public abstract class SoundEngineJukeboxMixin {
             if (sourceManager == null) continue;
 
             float maxVolume = sound.getVolume();
-
             sourceManager.execute(source -> {
                 source.setVolume(musicTweaks$wrapper.calculateAdjustedVolume(maxVolume * musicTweaks$currentMusicVolumeFactor, SoundSource.MUSIC));
-
                 if (musicTweaks$currentMusicVolumeFactor <= 0 && !musicTweaks$wasMusicPaused) {
                     sourceManager.execute(Channel::pause);
                 } else if (musicTweaks$currentMusicVolumeFactor > 0 && musicTweaks$wasMusicPaused) {
