@@ -17,6 +17,8 @@ public final class JukeboxOffsetState {
     private static final Set<BlockPos> CUSTOM_QUERIES = ConcurrentHashMap.newKeySet();
     private static final Set<BlockPos> UNSUPPORTED_POSITIONS = ConcurrentHashMap.newKeySet();
     private static final Map<BlockPos, SoundInstance> CANCELLED_SOUNDS = new ConcurrentHashMap<>();
+    private static final Set<BlockPos> IDLE_JUKEBOXES = ConcurrentHashMap.newKeySet();
+
     private static volatile boolean recordHearable = false;
 
     private JukeboxOffsetState() {
@@ -95,6 +97,7 @@ public final class JukeboxOffsetState {
         UNSUPPORTED_POSITIONS.remove(pos);
         PENDING_QUERIES.entrySet().removeIf(e -> e.getValue().equals(pos));
         CANCELLED_SOUNDS.remove(pos);
+        IDLE_JUKEBOXES.remove(pos);
     }
 
     public static void addCancelledSound(BlockPos pos, SoundInstance sound) {
@@ -107,5 +110,17 @@ public final class JukeboxOffsetState {
 
     public static void removeCancelledSound(BlockPos pos) {
         CANCELLED_SOUNDS.remove(pos);
+    }
+
+    public static void markIdle(BlockPos pos) {
+        IDLE_JUKEBOXES.add(pos);
+    }
+
+    public static void clearIdle(BlockPos pos) {
+        IDLE_JUKEBOXES.remove(pos);
+    }
+
+    public static boolean isIdle(BlockPos pos) {
+        return IDLE_JUKEBOXES.contains(pos);
     }
 }

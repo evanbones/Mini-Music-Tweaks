@@ -72,6 +72,8 @@ public class JukeboxSyncHandler {
                 JukeboxOffsetState.markOurSound(original);
                 client.getSoundManager().play(original);
                 JukeboxOffsetState.trackSound(pos, original);
+            } else {
+                JukeboxOffsetState.markIdle(pos);
             }
         });
     }

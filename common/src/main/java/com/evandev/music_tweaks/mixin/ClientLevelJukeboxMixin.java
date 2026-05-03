@@ -27,6 +27,7 @@ import java.util.Map;
 
 @Mixin(ClientLevel.class)
 public class ClientLevelJukeboxMixin {
+
     @Unique
     private static final double SCAN_RADIUS_SQ = 4900.0D;
 
@@ -40,20 +41,24 @@ public class ClientLevelJukeboxMixin {
             double px = player.getX();
             double py = player.getY();
             double pz = player.getZ();
+
             List<BlockPos> toRemove = new ArrayList<>();
 
             for (Map.Entry<BlockPos, SoundInstance> entry : JukeboxOffsetState.getAllActiveSounds().entrySet()) {
                 BlockPos soundPos = entry.getKey();
                 SoundInstance soundInstance = entry.getValue();
                 BlockState state = level.getBlockState(soundPos);
-
                 boolean discGone = !state.hasProperty(JukeboxBlock.HAS_RECORD) || !state.getValue(JukeboxBlock.HAS_RECORD);
+
                 if (discGone) {
                     soundManager.stop(soundInstance);
                     JukeboxOffsetState.cancelQuery(soundPos);
                     toRemove.add(soundPos);
                 } else if (!soundManager.isActive(soundInstance)) {
                     toRemove.add(soundPos);
+
+                    JukeboxOffsetState.markIdle(soundPos);
+
                     if (soundInstance instanceof OffsetSoundInstance osi) {
                         osi.stop();
                     }
@@ -61,6 +66,7 @@ public class ClientLevelJukeboxMixin {
             }
 
             toRemove.forEach(JukeboxOffsetState::removeSound);
+
             int playerChunkX = ((int) px) >> 4;
             int playerChunkZ = ((int) pz) >> 4;
 
@@ -74,14 +80,15 @@ public class ClientLevelJukeboxMixin {
                                 double dx = pos.getX() + 0.5D - px;
                                 double dy = pos.getY() + 0.5D - py;
                                 double dz = pos.getZ() + 0.5D - pz;
+
                                 if (dx * dx + dy * dy + dz * dz <= SCAN_RADIUS_SQ
                                         && !JukeboxOffsetState.hasActiveSound(pos)
                                         && !JukeboxOffsetState.hasPendingQuery(pos)
-                                        && !JukeboxOffsetState.isUnsupported(pos)) {
+                                        && !JukeboxOffsetState.isUnsupported(pos)
+                                        && !JukeboxOffsetState.isIdle(pos)) {
 
                                     BlockState blockState = level.getBlockState(pos);
                                     if (blockState.hasProperty(JukeboxBlock.HAS_RECORD) && blockState.getValue(JukeboxBlock.HAS_RECORD)) {
-
                                         if (Services.PLATFORM.isModLoadedOnServer()) {
                                             JukeboxOffsetState.registerCustomQuery(pos);
                                             Services.PLATFORM.sendJukeboxSyncRequest(pos);

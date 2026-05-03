@@ -63,10 +63,18 @@ public abstract class SoundEngineJukeboxMixin {
 
                 if (client.level != null && client.getConnection() != null) {
                     if (!JukeboxOffsetState.isUnsupported(blockPos)) {
-                        if (!JukeboxOffsetState.hasActiveSound(blockPos) && !JukeboxOffsetState.hasPendingQuery(blockPos)) {
-                            ci.cancel();
-                            JukeboxOffsetState.addCancelledSound(blockPos, p_sound);
 
+                        JukeboxOffsetState.clearIdle(blockPos);
+
+                        if (JukeboxOffsetState.hasActiveSound(blockPos)) {
+                            ci.cancel();
+                            return;
+                        }
+
+                        JukeboxOffsetState.addCancelledSound(blockPos, p_sound);
+                        ci.cancel();
+
+                        if (!JukeboxOffsetState.hasPendingQuery(blockPos)) {
                             if (Services.PLATFORM.isModLoadedOnServer()) {
                                 JukeboxOffsetState.registerCustomQuery(blockPos);
                                 Services.PLATFORM.sendJukeboxSyncRequest(blockPos);
@@ -77,8 +85,6 @@ public abstract class SoundEngineJukeboxMixin {
                                 JukeboxOffsetState.markUnsupported(blockPos);
                                 JukeboxSyncHandler.playFallback(blockPos);
                             }
-                        } else {
-                            ci.cancel();
                         }
                         return;
                     }
