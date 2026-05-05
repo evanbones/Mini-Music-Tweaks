@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed further issues with Additional Additions.
+- Fixed issues with Noteblocks.

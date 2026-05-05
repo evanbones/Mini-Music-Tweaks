@@ -15,6 +15,7 @@ import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -62,31 +63,32 @@ public abstract class SoundEngineJukeboxMixin {
                 Minecraft client = Minecraft.getInstance();
 
                 if (client.level != null && client.getConnection() != null) {
-                    if (!JukeboxOffsetState.isUnsupported(blockPos)) {
+                    if (client.level.getBlockState(blockPos).getBlock() instanceof JukeboxBlock) {
+                        if (!JukeboxOffsetState.isUnsupported(blockPos)) {
+                            JukeboxOffsetState.clearIdle(blockPos);
 
-                        JukeboxOffsetState.clearIdle(blockPos);
+                            if (JukeboxOffsetState.hasActiveSound(blockPos)) {
+                                ci.cancel();
+                                return;
+                            }
 
-                        if (JukeboxOffsetState.hasActiveSound(blockPos)) {
+                            JukeboxOffsetState.addCancelledSound(blockPos, p_sound);
                             ci.cancel();
+
+                            if (!JukeboxOffsetState.hasPendingQuery(blockPos)) {
+                                if (Services.PLATFORM.isModLoadedOnServer()) {
+                                    JukeboxOffsetState.registerCustomQuery(blockPos);
+                                    Services.PLATFORM.sendJukeboxSyncRequest(blockPos);
+                                } else if (client.player != null && client.player.hasPermissions(2)) {
+                                    int transactionId = JukeboxOffsetState.registerQuery(blockPos);
+                                    client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                                } else {
+                                    JukeboxOffsetState.markUnsupported(blockPos);
+                                    JukeboxSyncHandler.playFallback(blockPos);
+                                }
+                            }
                             return;
                         }
-
-                        JukeboxOffsetState.addCancelledSound(blockPos, p_sound);
-                        ci.cancel();
-
-                        if (!JukeboxOffsetState.hasPendingQuery(blockPos)) {
-                            if (Services.PLATFORM.isModLoadedOnServer()) {
-                                JukeboxOffsetState.registerCustomQuery(blockPos);
-                                Services.PLATFORM.sendJukeboxSyncRequest(blockPos);
-                            } else if (client.player != null && client.player.hasPermissions(2)) {
-                                int transactionId = JukeboxOffsetState.registerQuery(blockPos);
-                                client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
-                            } else {
-                                JukeboxOffsetState.markUnsupported(blockPos);
-                                JukeboxSyncHandler.playFallback(blockPos);
-                            }
-                        }
-                        return;
                     }
                 }
             }
