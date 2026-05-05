@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with Quark Ambience discs.
+- Fixed issues with Noteblocks.

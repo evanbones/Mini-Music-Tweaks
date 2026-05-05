@@ -11,6 +11,7 @@ import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQuery;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -48,22 +49,24 @@ public abstract class SoundEngineJukeboxMixin {
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance p_sound, CallbackInfo ci) {
         if (p_sound.getSource() == SoundSource.RECORDS) {
-
             if (p_sound.isLooping()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 JukeboxOffsetState.trackSound(blockPos, p_sound);
             } else if (!JukeboxOffsetState.isOurSound(p_sound)) {
-                ci.cancel();
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 Minecraft client = Minecraft.getInstance();
-                if (client.level != null && client.getConnection() != null) {
-                    if (!JukeboxOffsetState.hasActiveSound(blockPos) &&
+
+                if (client.level != null && client.level.getBlockState(blockPos).getBlock() instanceof JukeboxBlock) {
+                    ci.cancel();
+                    if (client.getConnection() != null &&
+                            !JukeboxOffsetState.hasActiveSound(blockPos) &&
                             !JukeboxOffsetState.hasPendingQuery(blockPos)) {
+
                         int transactionId = JukeboxOffsetState.registerQuery(blockPos);
                         client.getConnection().send(new ServerboundBlockEntityTagQuery(transactionId, blockPos));
                     }
+                    return;
                 }
-                return;
             }
         }
 
