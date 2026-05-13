@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with Noteblocks.
+- Fixed issues with GeckoLib.
