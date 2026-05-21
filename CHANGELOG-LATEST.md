@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with GeckoLib.
+- Add support for Etched audio sources.
