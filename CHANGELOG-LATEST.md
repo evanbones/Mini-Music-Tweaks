@@ -1,3 +1,3 @@
 ### Fixed
 
-- Add support for Etched audio sources.
+- Fixed NeoForge handshake for servers without the mod installed.

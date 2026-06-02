@@ -23,7 +23,7 @@ import java.util.Optional;
 public class MiniMusicTweaks {
     public MiniMusicTweaks(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerNetwork); // Add Network Event
+        modEventBus.addListener(this::registerNetwork);
 
         if (FMLEnvironment.dist.isClient()) {
             MiniMusicTweaksClient.register(modContainer, modEventBus);
@@ -35,7 +35,7 @@ public class MiniMusicTweaks {
     }
 
     private void registerNetwork(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar(Constants.MOD_ID).versioned("1.0");
+        final PayloadRegistrar registrar = event.registrar(Constants.MOD_ID).versioned("1.0").optional();
 
         registrar.playToServer(
                 JukeboxSyncRequestPayload.ID,
