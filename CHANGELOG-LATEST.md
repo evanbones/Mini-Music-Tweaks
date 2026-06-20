@@ -1,3 +1,3 @@
-### Added
+### Fixed
 
-- Added a fix for MC-10436 (Jukeboxes stop playing after relogging/reloading world).
+- Ported various fixes from 1.21.

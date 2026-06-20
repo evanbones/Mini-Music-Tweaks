@@ -1,12 +1,22 @@
 package com.evandev.music_tweaks.mixin;
 
+import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
+import com.evandev.music_tweaks.client.jukebox.JukeboxSyncHandler;
+import com.evandev.music_tweaks.client.jukebox.OffsetSoundInstance;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.audio.Channel;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.JukeboxBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -30,11 +40,11 @@ public abstract class SoundEngineJukeboxMixin {
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_OUT = 1f / TICKS_TO_FULLY_FADE_OUT;
     @Unique
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_IN = 1f / TICKS_TO_FULLY_FADE_IN;
+
     @Unique
     private static final Map<SoundInstance, Vec3> musicTweaks$coordinates = new HashMap<>();
     @Unique
     private final SoundEngineWrapper musicTweaks$wrapper = (SoundEngineWrapper) this;
-
     @Unique
     private float musicTweaks$currentMusicVolumeFactor = 1f;
     @Unique
@@ -42,28 +52,80 @@ public abstract class SoundEngineJukeboxMixin {
     @Unique
     private boolean musicTweaks$wasMusicPaused = false;
 
+    @Unique
+    private SoundInstance musicTweaks$unwrapEtchedSound(SoundInstance sound) {
+        if (sound.getClass().getName().startsWith("gg.moonflower.etched")) {
+            try {
+                java.lang.reflect.Method getParentMethod = sound.getClass().getMethod("getParent");
+                Object parent = getParentMethod.invoke(sound);
+                if (parent instanceof SoundInstance parentSound) {
+                    return parentSound;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return sound;
+    }
+
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance instance, CallbackInfoReturnable<SoundEngine.PlayResult> cir) {
+        boolean isOurSound = JukeboxOffsetState.isOurSound(instance);
+
         if (instance.getSource() == SoundSource.RECORDS) {
-            if (!com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.isOurSound(instance)) {
-                cir.cancel();
-                net.minecraft.core.BlockPos blockPos = net.minecraft.core.BlockPos.containing(instance.getX(), instance.getY(), instance.getZ());
-                net.minecraft.client.Minecraft client = net.minecraft.client.Minecraft.getInstance();
-                if (client.level != null && client.getConnection() != null) {
-                    if (!com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.hasActiveSound(blockPos) &&
-                            !com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.hasPendingQuery(blockPos)) {
-                        int transactionId = com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState.registerQuery(blockPos);
-                        client.getConnection().send(new net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+            if (instance.isLooping()) {
+                BlockPos blockPos = BlockPos.containing(instance.getX(), instance.getY(), instance.getZ());
+                Minecraft client = Minecraft.getInstance();
+                if (client.level != null) {
+                    BlockState state = client.level.getBlockState(blockPos);
+                    if (state.hasProperty(JukeboxBlock.HAS_RECORD) && state.getValue(JukeboxBlock.HAS_RECORD)) {
+                        JukeboxOffsetState.trackSound(blockPos, instance);
                     }
                 }
-                return;
+            } else if (!isOurSound && instance instanceof SimpleSoundInstance && !instance.isRelative()) {
+                BlockPos blockPos = BlockPos.containing(instance.getX(), instance.getY(), instance.getZ());
+                Minecraft client = Minecraft.getInstance();
+
+                if (client.level != null && client.getConnection() != null) {
+                    if (client.level.getBlockState(blockPos).getBlock() instanceof JukeboxBlock) {
+                        if (!JukeboxOffsetState.isUnsupported(blockPos)) {
+                            JukeboxOffsetState.clearIdle(blockPos);
+
+                            if (JukeboxOffsetState.hasActiveSound(blockPos)) {
+                                cir.cancel();
+                                return;
+                            }
+
+                            JukeboxOffsetState.addCancelledSound(blockPos, instance);
+                            cir.cancel();
+
+                            if (!JukeboxOffsetState.hasPendingQuery(blockPos)) {
+                                if (client.player != null && client.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                    int transactionId = JukeboxOffsetState.registerQuery(blockPos);
+                                    client.getConnection().send(new ServerboundBlockEntityTagQueryPacket(transactionId, blockPos));
+                                } else {
+                                    JukeboxOffsetState.markUnsupported(blockPos);
+                                    JukeboxSyncHandler.playFallback(blockPos);
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
             }
         }
 
         if (!ModConfig.get().general.betterJukeboxes.value()) return;
 
-        if (instance.getSource() == SoundSource.RECORDS &&
-                instance instanceof AbstractSoundInstanceWrapper modifiedSound) {
+        SoundInstance targetSound = musicTweaks$unwrapEtchedSound(instance);
+        boolean isEtched = targetSound != instance;
+
+        boolean isSafeToModify = isOurSound ||
+                targetSound instanceof SimpleSoundInstance ||
+                targetSound instanceof OffsetSoundInstance ||
+                isEtched;
+
+        if (isSafeToModify && instance.getSource() == SoundSource.RECORDS &&
+                targetSound instanceof AbstractSoundInstanceWrapper modifiedSound) {
 
             modifiedSound.setRelative(true);
             modifiedSound.setAttenuationType(SoundInstance.Attenuation.NONE);
@@ -93,6 +155,17 @@ public abstract class SoundEngineJukeboxMixin {
 
         for (SoundInstance sound : records) {
             if (betterJukeboxes && musicTweaks$coordinates.containsKey(sound)) {
+                SoundInstance targetSound = musicTweaks$unwrapEtchedSound(sound);
+
+                if (sound.getX() != 0 || sound.getY() != 0 || sound.getZ() != 0) {
+                    musicTweaks$coordinates.put(sound, new Vec3(sound.getX(), sound.getY(), sound.getZ()));
+                    if (targetSound instanceof AbstractSoundInstanceWrapper modifiedSound) {
+                        modifiedSound.setX(0);
+                        modifiedSound.setY(0);
+                        modifiedSound.setZ(0);
+                    }
+                }
+
                 double distanceSquared = playerPosition.distanceToSqr(musicTweaks$coordinates.get(sound));
                 if (distanceSquared < maxDistanceSquared) {
                     amountRecordsHearable++;
@@ -129,7 +202,6 @@ public abstract class SoundEngineJukeboxMixin {
 
         for (SoundInstance sound : records) {
             ChannelAccess.ChannelHandle sourceManager = musicTweaks$wrapper.getInstanceToChannel().get(sound);
-
             if (sourceManager == null) {
                 musicTweaks$coordinates.remove(sound);
                 continue;
@@ -145,7 +217,8 @@ public abstract class SoundEngineJukeboxMixin {
 
                 sourceManager.execute(source -> source.setVolume(finalVolume));
 
-                if (sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
+                SoundInstance targetSound = musicTweaks$unwrapEtchedSound(sound);
+                if (targetSound instanceof AbstractSoundInstanceWrapper modifiedSound) {
                     modifiedSound.trackVolumeForReferenceOnly(finalVolume);
                 }
             } else {
@@ -165,7 +238,6 @@ public abstract class SoundEngineJukeboxMixin {
         if (!musicTweaks$wrapper.isLoaded()) return;
 
         Collection<SoundInstance> music = musicTweaks$wrapper.getInstanceBySource().get(SoundSource.MUSIC);
-
         for (SoundInstance sound : music) {
             if (MusicClientLogic.getInstance().isCombatSound(sound)) continue;
 
@@ -173,7 +245,6 @@ public abstract class SoundEngineJukeboxMixin {
             if (sourceManager == null) continue;
 
             float maxVolume = sound.getVolume();
-
             sourceManager.execute(source -> {
                 source.setVolume(musicTweaks$wrapper.calculateAdjustedVolume(maxVolume * musicTweaks$currentMusicVolumeFactor, SoundSource.MUSIC));
 
