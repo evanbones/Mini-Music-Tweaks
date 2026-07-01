@@ -78,6 +78,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> config.permanentToastInOptions = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.play_toast_sound"), config.playToastSound)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.play_toast_sound.tooltip"))
+                .setSaveConsumer(newValue -> config.playToastSound = newValue)
+                .build());
+
         return builder.build();
     }
 }

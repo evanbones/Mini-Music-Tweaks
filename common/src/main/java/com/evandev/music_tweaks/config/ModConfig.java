@@ -45,6 +45,9 @@ public class ModConfig {
     @SerializedName("permanent_toast_in_options")
     public boolean permanentToastInOptions = true;
 
+    @SerializedName("play_toast_sound")
+    public boolean playToastSound = true;
+
     public static ModConfig get() {
         if (INSTANCE == null) {
             load();

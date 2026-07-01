@@ -1,3 +1,3 @@
-### Fixed
+### Added
 
-- Fixed NeoForge handshake for servers without the mod installed.
+- Added a config option to silence music toasts.

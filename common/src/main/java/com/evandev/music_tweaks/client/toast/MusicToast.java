@@ -135,6 +135,7 @@ public class MusicToast implements Toast {
     }
 
     public boolean shouldBeSilent() {
+        if (!ModConfig.get().playToastSound) return true;
         if (this != getActiveToast()) return true;
         return ModConfig.get().permanentToastInOptions && (isMenuOpen() || this.forceSnapHidden);
     }
