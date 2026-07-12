@@ -25,8 +25,11 @@ repositories {
     }
 
     maven {
-        name = 'BlameJared'
-        url = 'https://maven.blamejared.com'
+        name = "Cassian's Maven"
+        url = uri("https://maven.cassian.cc")
+        content {
+            includeGroupAndSubgroups("cc.cassian")
+        }
     }
 
     exclusiveContent {
@@ -56,13 +59,6 @@ repositories {
         url = "https://repo.sleeping.town/"
     }
 
-    maven {
-        name = "Cassian's Maven"
-        url = uri("https://maven.cassian.cc")
-        content {
-            includeGroupAndSubgroups("cc.cassian")
-        }
-    }
 }
 
 ['apiElements', 'runtimeElements', 'sourcesElements'].each { variant ->

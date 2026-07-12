@@ -1,3 +1,1 @@
-### Fixed
-
-- Ported various fixes from 1.21.
+- Ported to 26.2.

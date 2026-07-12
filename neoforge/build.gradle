@@ -44,7 +44,7 @@ dependencies {
     implementation("folk.sisby:kaleido-config:${kaleido_version}")
     jarJar("folk.sisby:kaleido-config:${kaleido_version}")
 
-    runtimeOnly("cc.cassian.rrv:reliable-recipe-viewer-neoforge:${rrv_version}")
+    runtimeOnly "cc.cassian.rrv:reliable-recipe-viewer-neoforge:${rrv_version}"
 }
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
