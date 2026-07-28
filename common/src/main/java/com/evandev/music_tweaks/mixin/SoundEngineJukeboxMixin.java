@@ -1,10 +1,12 @@
 package com.evandev.music_tweaks.mixin;
 
 import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
+import com.evandev.music_tweaks.client.jukebox.OffsetSoundInstance;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.config.ModConfig;
 import com.mojang.blaze3d.audio.Channel;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
@@ -48,11 +50,13 @@ public abstract class SoundEngineJukeboxMixin {
 
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void injectPlay(SoundInstance p_sound, CallbackInfo ci) {
+        boolean isOurSound = JukeboxOffsetState.isOurSound(p_sound);
+
         if (p_sound.getSource() == SoundSource.RECORDS) {
             if (p_sound.isLooping()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 JukeboxOffsetState.trackSound(blockPos, p_sound);
-            } else if (!JukeboxOffsetState.isOurSound(p_sound)) {
+            } else if (!isOurSound && p_sound instanceof SimpleSoundInstance && !p_sound.isRelative()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 Minecraft client = Minecraft.getInstance();
 
@@ -72,7 +76,11 @@ public abstract class SoundEngineJukeboxMixin {
 
         if (!ModConfig.get().betterJukeboxes) return;
 
-        if (p_sound.getSource() == SoundSource.RECORDS &&
+        boolean isSafeToModify = isOurSound ||
+                p_sound instanceof SimpleSoundInstance ||
+                p_sound instanceof OffsetSoundInstance;
+
+        if (isSafeToModify && p_sound.getSource() == SoundSource.RECORDS &&
                 p_sound instanceof AbstractSoundInstanceWrapper modifiedSound) {
 
             modifiedSound.setRelative(true);

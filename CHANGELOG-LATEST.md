@@ -1,3 +1,3 @@
 ### Fixed
 
-- Fixed issues with GeckoLib.
+- Backported some fixes from 1.21.
