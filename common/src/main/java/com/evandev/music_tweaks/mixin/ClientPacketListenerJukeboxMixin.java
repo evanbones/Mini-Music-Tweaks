@@ -48,7 +48,11 @@ public class ClientPacketListenerJukeboxMixin {
                         if (world != null) {
                             BlockState state = world.getBlockState(pos);
                             if (state.hasProperty(JukeboxBlock.HAS_RECORD) && state.getValue(JukeboxBlock.HAS_RECORD)) {
-                                if (!JukeboxOffsetState.hasActiveSound(pos)) {
+                                SoundInstance foreignSound = JukeboxOffsetState.getForeignSound(pos);
+                                boolean handledByForeignMod = foreignSound != null && client.getSoundManager().isActive(foreignSound);
+
+                                if (!handledByForeignMod && !JukeboxOffsetState.hasActiveSound(pos)
+                                        && !JukeboxOffsetState.isUnsupported(pos)) {
                                     ItemStack recordItem = ItemStack.of(recordNbt);
                                     if (!recordItem.isEmpty() && recordItem.getItem() instanceof RecordItem record) {
                                         SoundEvent soundEvent = record.getSound();

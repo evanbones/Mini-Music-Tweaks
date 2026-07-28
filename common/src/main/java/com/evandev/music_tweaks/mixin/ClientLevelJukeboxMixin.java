@@ -50,12 +50,14 @@ public class ClientLevelJukeboxMixin {
                 if (discGone) {
                     soundManager.stop(soundInstance);
                     JukeboxOffsetState.cancelQuery(soundPos);
+                    JukeboxOffsetState.resetPosition(soundPos);
                     toRemove.add(soundPos);
                 } else if (!soundManager.isActive(soundInstance)) {
                     toRemove.add(soundPos);
                     if (soundInstance instanceof OffsetSoundInstance osi) {
                         osi.stop();
                     }
+                    JukeboxOffsetState.recordSyncOutcome(soundPos);
                 }
             }
 
@@ -73,9 +75,18 @@ public class ClientLevelJukeboxMixin {
                                 double dx = pos.getX() + 0.5D - px;
                                 double dy = pos.getY() + 0.5D - py;
                                 double dz = pos.getZ() + 0.5D - pz;
+                                SoundInstance foreignSound = JukeboxOffsetState.getForeignSound(pos);
+                                if (foreignSound != null) {
+                                    if (soundManager.isActive(foreignSound)) {
+                                        continue;
+                                    }
+                                    JukeboxOffsetState.removeForeignSound(pos);
+                                }
+
                                 if (dx * dx + dy * dy + dz * dz <= SCAN_RADIUS_SQ
                                         && !JukeboxOffsetState.hasActiveSound(pos)
-                                        && !JukeboxOffsetState.hasPendingQuery(pos)) {
+                                        && !JukeboxOffsetState.hasPendingQuery(pos)
+                                        && !JukeboxOffsetState.isUnsupported(pos)) {
 
                                     BlockState blockState = level.getBlockState(pos);
                                     if (blockState.hasProperty(JukeboxBlock.HAS_RECORD) && blockState.getValue(JukeboxBlock.HAS_RECORD)) {

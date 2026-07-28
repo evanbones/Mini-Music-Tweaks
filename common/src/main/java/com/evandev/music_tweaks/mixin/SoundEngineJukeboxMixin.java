@@ -56,20 +56,26 @@ public abstract class SoundEngineJukeboxMixin {
             if (p_sound.isLooping()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 JukeboxOffsetState.trackSound(blockPos, p_sound);
-            } else if (!isOurSound && p_sound instanceof SimpleSoundInstance && !p_sound.isRelative()) {
+            } else if (!isOurSound && !p_sound.isRelative()) {
                 BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
-                Minecraft client = Minecraft.getInstance();
 
-                if (client.level != null && client.level.getBlockState(blockPos).getBlock() instanceof JukeboxBlock) {
-                    ci.cancel();
-                    if (client.getConnection() != null &&
-                            !JukeboxOffsetState.hasActiveSound(blockPos) &&
-                            !JukeboxOffsetState.hasPendingQuery(blockPos)) {
+                if (p_sound instanceof SimpleSoundInstance) {
+                    Minecraft client = Minecraft.getInstance();
 
-                        int transactionId = JukeboxOffsetState.registerQuery(blockPos);
-                        client.getConnection().send(new ServerboundBlockEntityTagQuery(transactionId, blockPos));
+                    if (client.level != null && client.level.getBlockState(blockPos).getBlock() instanceof JukeboxBlock
+                            && !JukeboxOffsetState.isUnsupported(blockPos)) {
+                        ci.cancel();
+                        if (client.getConnection() != null &&
+                                !JukeboxOffsetState.hasActiveSound(blockPos) &&
+                                !JukeboxOffsetState.hasPendingQuery(blockPos)) {
+
+                            int transactionId = JukeboxOffsetState.registerQuery(blockPos);
+                            client.getConnection().send(new ServerboundBlockEntityTagQuery(transactionId, blockPos));
+                        }
+                        return;
                     }
-                    return;
+                } else {
+                    JukeboxOffsetState.markForeignSound(blockPos, p_sound);
                 }
             }
         }

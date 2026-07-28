@@ -1,3 +1,3 @@
 ### Fixed
 
-- Backported some fixes from 1.21.
+- Backported more fixes from 1.21.
