@@ -1,3 +1,4 @@
-### Fixed
+### Changed
 
-- Backported more fixes from 1.21.
+- Backported more improvements from 1.21.
+- Split the better jukeboxes config into mono jukeboxes and jukebox fade options.

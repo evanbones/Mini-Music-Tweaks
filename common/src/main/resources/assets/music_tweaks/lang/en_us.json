@@ -20,8 +20,11 @@
   "config.music_tweaks.show_music_toast": "Show Music Toast",
   "config.music_tweaks.show_music_toast.tooltip": "Displays a popup toast in the top right when a music track or disc starts playing.",
 
-  "config.music_tweaks.better_jukeboxes": "Better Jukeboxes",
-  "config.music_tweaks.better_jukeboxes.tooltip": "Fades out background music when near a playing Jukebox.",
+  "config.music_tweaks.mono_jukeboxes": "Mono Jukeboxes",
+  "config.music_tweaks.mono_jukeboxes.tooltip": "Makes jukebox and record player audio non-positional, fixing the annoying panning effect when not facing the jukebox directly.",
+
+  "config.music_tweaks.jukebox_fade_out": "Jukebox Music Fade Out",
+  "config.music_tweaks.jukebox_fade_out.tooltip": "Fades out background music when near a playing jukebox.",
 
   "config.music_tweaks.jukebox_distance": "Jukebox Distance",
   "config.music_tweaks.jukebox_distance.tooltip": "The radius in blocks around a jukebox that will fade out background music."

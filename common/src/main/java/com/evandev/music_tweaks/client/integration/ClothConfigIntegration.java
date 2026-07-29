@@ -60,10 +60,16 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> config.showMusicToast = newValue)
                 .build());
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.better_jukeboxes"), config.betterJukeboxes)
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.mono_jukeboxes"), config.monoJukeboxes)
                 .setDefaultValue(true)
-                .setTooltip(Component.translatable("config.music_tweaks.better_jukeboxes.tooltip"))
-                .setSaveConsumer(newValue -> config.betterJukeboxes = newValue)
+                .setTooltip(Component.translatable("config.music_tweaks.mono_jukeboxes.tooltip"))
+                .setSaveConsumer(newValue -> config.monoJukeboxes = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.jukebox_fade_out"), config.jukeboxFadeOut)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.jukebox_fade_out.tooltip"))
+                .setSaveConsumer(newValue -> config.jukeboxFadeOut = newValue)
                 .build());
 
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("config.music_tweaks.jukebox_distance"), config.jukeboxDistance)

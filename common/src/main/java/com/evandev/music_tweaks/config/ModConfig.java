@@ -37,7 +37,10 @@ public class ModConfig {
     public boolean showMusicToast = true;
 
     @SerializedName("better_jukeboxes")
-    public boolean betterJukeboxes = true;
+    public boolean monoJukeboxes = true;
+
+    @SerializedName("jukebox_fade_out")
+    public boolean jukeboxFadeOut = true;
 
     @SerializedName("jukebox_distance")
     public double jukeboxDistance = 64.0;
