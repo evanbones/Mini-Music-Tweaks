@@ -48,6 +48,9 @@ public class ModConfig {
     @SerializedName("play_toast_sound")
     public boolean playToastSound = true;
 
+    @SerializedName("play_music_when_paused")
+    public boolean playMusicWhenPaused = true;
+
     public static ModConfig get() {
         if (INSTANCE == null) {
             load();

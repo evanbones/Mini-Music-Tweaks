@@ -30,5 +30,8 @@
   "config.music_tweaks.permanent_toast_in_options.tooltip": "Keeps the music toast continuously displayed on screen while navigating the options menus.",
 
   "config.music_tweaks.play_toast_sound": "Play Toast Sound",
-  "config.music_tweaks.play_toast_sound.tooltip": "Whether to play the vanilla 'whoosh' sound when a music toast appears."
+  "config.music_tweaks.play_toast_sound.tooltip": "Whether to play the vanilla 'whoosh' sound when a music toast appears.",
+
+  "config.music_tweaks.play_music_when_paused": "Play Music When Paused",
+  "config.music_tweaks.play_music_when_paused.tooltip": "Allows any music currently playing to continue playing when the game is paused."
 }

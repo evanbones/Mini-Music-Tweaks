@@ -84,6 +84,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> config.playToastSound = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.play_music_when_paused"), config.playMusicWhenPaused)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.play_music_when_paused.tooltip"))
+                .setSaveConsumer(newValue -> config.playMusicWhenPaused = newValue)
+                .build());
+
         return builder.build();
     }
 }
