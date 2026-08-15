@@ -43,7 +43,8 @@ publishMods {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "1496528"
         minecraftVersions.add("${minecraft_version}")
-
+        client = true
+        server = true
         optional("cloth-config")
     }
 
