@@ -1,3 +1,3 @@
 ### Added
 
-- Added a config option to continue playing music in the pause menu.
+- Added a tag for damage sources that don't trigger combat music.

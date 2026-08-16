@@ -1,0 +1,27 @@
+{
+  "values": [
+    "minecraft:bad_respawn_point",
+    "minecraft:cactus",
+    "minecraft:campfire",
+    "minecraft:cramming",
+    "minecraft:drown",
+    "minecraft:dry_out",
+    "minecraft:fall",
+    "minecraft:falling_anvil",
+    "minecraft:falling_block",
+    "minecraft:falling_stalactite",
+    "minecraft:fly_into_wall",
+    "minecraft:freeze",
+    "minecraft:hot_floor",
+    "minecraft:in_fire",
+    "minecraft:in_wall",
+    "minecraft:lava",
+    "minecraft:lightning_bolt",
+    "minecraft:on_fire",
+    "minecraft:outside_border",
+    "minecraft:out_of_world",
+    "minecraft:stalagmite",
+    "minecraft:starve",
+    "minecraft:sweet_berry_bush"
+  ]
+}

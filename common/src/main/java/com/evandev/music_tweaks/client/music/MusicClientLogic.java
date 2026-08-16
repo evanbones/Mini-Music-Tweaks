@@ -1,6 +1,7 @@
 package com.evandev.music_tweaks.client.music;
 
 import com.evandev.music_tweaks.Constants;
+import com.evandev.music_tweaks.ModTags;
 import com.evandev.music_tweaks.config.ModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -10,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.AABB;
@@ -22,7 +24,7 @@ public class MusicClientLogic {
     private CombatSoundInstance currentCombatMusic;
     private boolean inCombat = false;
     private int ticksSinceCombatUpdate = 0;
-    private boolean wasHurtLastTick = false;
+    private boolean combatDamageTaken = false;
 
     private MusicClientLogic() {
     }
@@ -42,6 +44,11 @@ public class MusicClientLogic {
         return inCombat;
     }
 
+    public void onPlayerDamaged(DamageSource damageSource) {
+        if (damageSource.is(ModTags.DOES_NOT_TRIGGER_COMBAT_MUSIC)) return;
+        combatDamageTaken = true;
+    }
+
     public void onClientTick(Minecraft mc) {
         ModConfig config = ModConfig.get();
         if (mc.level == null || !config.enabled) return;
@@ -49,14 +56,13 @@ public class MusicClientLogic {
         LocalPlayer player = mc.player;
         if (player == null) return;
 
-        boolean isHurt = player.hurtTime > 0;
-        if (isHurt && !wasHurtLastTick) {
+        if (combatDamageTaken) {
+            combatDamageTaken = false;
             if (mc.level.getDifficulty() != Difficulty.PEACEFUL) {
                 ticksSinceCombatUpdate = 0;
                 inCombat = true;
             }
         }
-        wasHurtLastTick = isHurt;
 
         if (mc.level.getGameTime() % 20 == 0) {
             int entityCount = getEntities(player);

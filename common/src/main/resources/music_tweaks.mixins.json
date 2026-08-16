@@ -9,6 +9,7 @@
     "AbstractSoundInstanceWrapper",
     "ClientLevelJukeboxMixin",
     "ClientPacketListenerJukeboxMixin",
+    "LivingEntityDamageMixin",
     "MinecraftScreenMixin",
     "MusicManagerMixin",
     "SoundBufferLibraryMixin",
