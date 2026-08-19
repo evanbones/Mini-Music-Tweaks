@@ -90,6 +90,18 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> config.playMusicWhenPaused = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.show_music_id_in_toast"), config.showMusicIdInToast)
+                .setDefaultValue(false)
+                .setTooltip(Component.translatable("config.music_tweaks.show_music_id_in_toast.tooltip"))
+                .setSaveConsumer(newValue -> config.showMusicIdInToast = newValue)
+                .build());
+
+        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("config.music_tweaks.log_missing_artists"), config.logMissingArtists)
+                .setDefaultValue(true)
+                .setTooltip(Component.translatable("config.music_tweaks.log_missing_artists.tooltip"))
+                .setSaveConsumer(newValue -> config.logMissingArtists = newValue)
+                .build());
+
         return builder.build();
     }
 }

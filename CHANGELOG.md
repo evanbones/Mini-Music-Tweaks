@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-08-19
+
+### Added
+
+- Added `/music_tweaks dump` (and `/musictweaks dump`) client command to export all music IDs and missing artist tracks
+  into JSON templates.
+- Added a config option to log music IDs to the console whenever a song plays without an artist.
+- Added a config option to display the music ID directly on toasts (also enabled automatically when `F3+H` is on).
+
 ## [1.6.1] - 2026-08-16
 
 ### Added

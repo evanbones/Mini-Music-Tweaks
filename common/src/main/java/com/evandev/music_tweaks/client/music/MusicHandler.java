@@ -20,10 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class MusicHandler implements ResourceManagerReloadListener {
     public static final MusicHandler INSTANCE = new MusicHandler();
@@ -83,7 +80,11 @@ public class MusicHandler implements ResourceManagerReloadListener {
         return new MusicMetadata(disc.getDescription(), Component.empty());
     }
 
-    private static String beautifyName(String input) {
+    public static Map<ResourceLocation, MusicMetadata> getMusicDb() {
+        return Collections.unmodifiableMap(MUSIC_DB);
+    }
+
+    public static String beautifyName(String input) {
         if (input == null || input.isEmpty()) return "";
         String[] words = input.split("[_.\\s]+");
         StringBuilder sb = new StringBuilder();

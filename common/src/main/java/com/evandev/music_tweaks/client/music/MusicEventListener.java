@@ -47,15 +47,25 @@ public class MusicEventListener implements SoundEventListener {
             Item discItem = findDiscBySound(sound);
             if (discItem == null) return;
 
+            ResourceLocation soundId = sound.getLocation();
             ItemStack icon = new ItemStack(discItem);
             MusicHandler.MusicMetadata metadata = MusicHandler.getDiscInfo(discItem);
 
-            mc.getToasts().addToast(new MusicToast(metadata, icon, sound));
+            if (ModConfig.get().logMissingArtists && metadata.author().getString().isEmpty()) {
+                Constants.LOG.info("Missing artist for record '{}' (ID: {})", metadata.title().getString(), soundId);
+            }
+
+            mc.getToasts().addToast(new MusicToast(metadata, soundId, icon, sound));
 
         } else {
-            MusicHandler.MusicMetadata metadata = MusicHandler.getMusicInfo(sound.getSound().getLocation());
+            ResourceLocation soundId = sound.getSound().getLocation();
+            MusicHandler.MusicMetadata metadata = MusicHandler.getMusicInfo(soundId);
 
-            mc.getToasts().addToast(new MusicToast(metadata, MUSIC_NOTES, sound));
+            if (ModConfig.get().logMissingArtists && metadata.author().getString().isEmpty()) {
+                Constants.LOG.info("Missing artist for music track '{}' (ID: {})", metadata.title().getString(), soundId);
+            }
+
+            mc.getToasts().addToast(new MusicToast(metadata, soundId, MUSIC_NOTES, sound));
         }
     }
 

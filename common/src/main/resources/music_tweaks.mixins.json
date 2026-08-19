@@ -15,8 +15,10 @@
     "SoundBufferLibraryMixin",
     "SoundEngineJukeboxMixin",
     "SoundEngineWrapper",
+    "SoundManagerAccessor",
     "SoundOptionsScreenMixin",
-    "ToastInstanceMixin"
+    "ToastInstanceMixin",
+    "WeighedSoundEventsAccessor"
   ],
   "server": [],
   "injectors": {

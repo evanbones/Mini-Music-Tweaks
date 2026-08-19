@@ -4,10 +4,13 @@ import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
 import com.evandev.music_tweaks.client.jukebox.JukeboxSyncHandler;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
+import com.evandev.music_tweaks.client.music.MusicDumpHelper;
 import com.evandev.music_tweaks.client.music.MusicEventListener;
 import com.evandev.music_tweaks.client.music.MusicHandler;
 import com.evandev.music_tweaks.network.JukeboxSyncResponsePayload;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -56,6 +59,25 @@ public class MiniMusicTweaksClient implements ClientModInitializer {
                 JukeboxOffsetState.resolveCustomQuery(payload.pos());
                 JukeboxSyncHandler.playSyncedSong(payload.pos(), payload.ticksSinceStart(), payload.recordItem());
             });
+        });
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(ClientCommandManager.literal("music_tweaks")
+                    .then(ClientCommandManager.literal("dump")
+                            .executes(context -> {
+                                MusicDumpHelper.dumpMusicIds(msg -> context.getSource().sendFeedback(msg));
+                                return 1;
+                            })
+                    )
+            );
+            dispatcher.register(ClientCommandManager.literal("musictweaks")
+                    .then(ClientCommandManager.literal("dump")
+                            .executes(context -> {
+                                MusicDumpHelper.dumpMusicIds(msg -> context.getSource().sendFeedback(msg));
+                                return 1;
+                            })
+                    )
+            );
         });
     }
 }

@@ -51,6 +51,12 @@ public class ModConfig {
     @SerializedName("play_music_when_paused")
     public boolean playMusicWhenPaused = true;
 
+    @SerializedName("log_missing_artists")
+    public boolean logMissingArtists = true;
+
+    @SerializedName("show_music_id_in_toast")
+    public boolean showMusicIdInToast = false;
+
     public static ModConfig get() {
         if (INSTANCE == null) {
             load();

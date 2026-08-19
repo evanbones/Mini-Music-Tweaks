@@ -33,5 +33,18 @@
   "config.music_tweaks.play_toast_sound.tooltip": "Whether to play the vanilla 'whoosh' sound when a music toast appears.",
 
   "config.music_tweaks.play_music_when_paused": "Play Music When Paused",
-  "config.music_tweaks.play_music_when_paused.tooltip": "Allows any music currently playing to continue playing when the game is paused."
+  "config.music_tweaks.play_music_when_paused.tooltip": "Allows any music currently playing to continue playing when the game is paused.",
+
+  "config.music_tweaks.show_music_id_in_toast": "Show Music ID in Toast",
+  "config.music_tweaks.show_music_id_in_toast.tooltip": "Displays the music sound ID directly on the toast popup. Also automatically shown when Advanced Tooltips (F3+H) is active.",
+
+  "config.music_tweaks.log_missing_artists": "Log Missing Artists",
+  "config.music_tweaks.log_missing_artists.tooltip": "Logs the music ID and title to the game log/console whenever a song without an artist starts playing.",
+
+  "music_tweaks.toast.artist": "Artist: %s",
+  "music_tweaks.toast.no_artist": "No artist registered",
+  "music_tweaks.toast.music_id": "Music ID: %s",
+  "music_tweaks.dump.success": "Dumped %d music tracks (%d without artists) to %s",
+  "music_tweaks.dump.view_missing": "Missing artists list saved to %s",
+  "music_tweaks.dump.failed": "Failed to dump music IDs: %s"
 }
