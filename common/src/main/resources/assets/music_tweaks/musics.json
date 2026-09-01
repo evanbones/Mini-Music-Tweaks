@@ -322,5 +322,441 @@
   "endergetic:music/game/end/poise_forest": {
     "title": "Poise Forest",
     "author": "Timinations"
+  },
+  "minecraft:music/game/below_and_above": {
+    "title": "Below and Above",
+    "author": "Amos Roddy"
+  },
+  "minecraft:music/game/broken_clocks": {
+    "title": "Broken Clocks",
+    "author": "Amos Roddy"
+  },
+  "minecraft:music/game/clark": {
+    "title": "Clark",
+    "author": "C418"
+  },
+  "minecraft:music/game/creative/aria_math": {
+    "title": "Aria Math",
+    "author": "C418"
+  },
+  "minecraft:music/game/creative/biome_fest": {
+    "title": "Biome Fest",
+    "author": "C418"
+  },
+  "minecraft:music/game/creative/blind_spots": {
+    "title": "Blind Spots",
+    "author": "C418"
+  },
+  "minecraft:music/game/creative/dreiton": {
+    "title": "Dreiton",
+    "author": "C418"
+  },
+  "minecraft:music/game/creative/haunt_muskie": {
+    "title": "Haunt Muskie",
+    "author": "C418"
+  },
+  "minecraft:music/game/creative/taswell": {
+    "title": "Taswell",
+    "author": "C418"
+  },
+  "minecraft:music/game/danny": {
+    "title": "Danny",
+    "author": "C418"
+  },
+  "minecraft:music/game/deeper": {
+    "title": "Deeper",
+    "author": "Lena Raine"
+  },
+  "minecraft:music/game/dry_hands": {
+    "title": "Dry Hands",
+    "author": "C418"
+  },
+  "minecraft:music/game/end/alpha": {
+    "title": "Alpha",
+    "author": "C418"
+  },
+  "minecraft:music/game/end/the_end": {
+    "title": "The End",
+    "author": "C418"
+  },
+  "minecraft:music/game/endless": {
+    "title": "Endless",
+    "author": "Lena Raine"
+  },
+  "minecraft:music/game/featherfall": {
+    "title": "Featherfall",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:music/game/fireflies": {
+    "title": "Fireflies",
+    "author": "Amos Roddy"
+  },
+  "minecraft:music/game/haggstrom": {
+    "title": "Haggstrom",
+    "author": "C418"
+  },
+  "minecraft:music/game/key": {
+    "title": "Key",
+    "author": "C418"
+  },
+  "minecraft:music/game/komorebi": {
+    "title": "komorebi",
+    "author": "Kumi Tanioka"
+  },
+  "minecraft:music/game/lilypad": {
+    "title": "Lilypad",
+    "author": "Amos Roddy"
+  },
+  "minecraft:music/game/living_mice": {
+    "title": "Living Mice",
+    "author": "C418"
+  },
+  "minecraft:music/game/mice_on_venus": {
+    "title": "Mice on Venus",
+    "author": "C418"
+  },
+  "minecraft:music/game/minecraft": {
+    "title": "Minecraft",
+    "author": "C418"
+  },
+  "minecraft:music/game/nether/ballad_of_the_cats": {
+    "title": "Ballad of the Cats",
+    "author": "C418"
+  },
+  "minecraft:music/game/nether/concrete_halls": {
+    "title": "Concrete Halls",
+    "author": "C418"
+  },
+  "minecraft:music/game/nether/dead_voxel": {
+    "title": "Dead Voxel",
+    "author": "C418"
+  },
+  "minecraft:music/game/nether/warmth": {
+    "title": "Warmth",
+    "author": "C418"
+  },
+  "minecraft:music/game/os_piano": {
+    "title": "O's Piano",
+    "author": "Amos Roddy"
+  },
+  "minecraft:music/game/oxygene": {
+    "title": "Oxyg\u00e8ne",
+    "author": "C418"
+  },
+  "minecraft:music/game/pokopoko": {
+    "title": "pokopoko",
+    "author": "Kumi Tanioka"
+  },
+  "minecraft:music/game/puzzlebox": {
+    "title": "Puzzlebox",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:music/game/subwoofer_lullaby": {
+    "title": "Subwoofer Lullaby",
+    "author": "C418"
+  },
+  "minecraft:music/game/sweden": {
+    "title": "Sweden",
+    "author": "C418"
+  },
+  "minecraft:music/game/watcher": {
+    "title": "Watcher",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:music/game/wet_hands": {
+    "title": "Wet Hands",
+    "author": "C418"
+  },
+  "minecraft:music/game/yakusoku": {
+    "title": "yakusoku",
+    "author": "Kumi Tanioka"
+  },
+  "minecraft:music/menu/beginning_2": {
+    "title": "Beginning 2",
+    "author": "C418"
+  },
+  "minecraft:music/menu/floating_trees": {
+    "title": "Floating Trees",
+    "author": "C418"
+  },
+  "minecraft:music/menu/moog_city_2": {
+    "title": "Moog City 2",
+    "author": "C418"
+  },
+  "minecraft:music/menu/mutation": {
+    "title": "Mutation",
+    "author": "C418"
+  },
+  "minecraft:music/game/ebb": {
+    "title": "Ebb",
+    "author": "fingerspit"
+  },
+  "minecraft:music/game/home": {
+    "title": "Home",
+    "author": "fingerspit"
+  },
+  "minecraft:music/game/memories": {
+    "title": "Memories",
+    "author": "fingerspit"
+  },
+  "minecraft:music/game/nightly": {
+    "title": "Nightly",
+    "author": "fingerspit"
+  },
+  "minecraft:music_disc.11": {
+    "title": "11",
+    "author": "C418"
+  },
+  "minecraft:music_disc.13": {
+    "title": "13",
+    "author": "C418"
+  },
+  "minecraft:music_disc.5": {
+    "title": "5",
+    "author": "Samuel \u00c5berg"
+  },
+  "minecraft:music_disc.blocks": {
+    "title": "Blocks",
+    "author": "C418"
+  },
+  "minecraft:music_disc.bounce": {
+    "title": "Bounce",
+    "author": "fingerspit"
+  },
+  "minecraft:music_disc.cat": {
+    "title": "Cat",
+    "author": "C418"
+  },
+  "minecraft:music_disc.chirp": {
+    "title": "Chirp",
+    "author": "C418"
+  },
+  "minecraft:music_disc.creator": {
+    "title": "Creator",
+    "author": "Lena Raine"
+  },
+  "minecraft:music_disc.creator_music_box": {
+    "title": "Creator (Music Box)",
+    "author": "Lena Raine"
+  },
+  "minecraft:music_disc.far": {
+    "title": "Far",
+    "author": "C418"
+  },
+  "minecraft:music_disc.lava_chicken": {
+    "title": "Lava Chicken",
+    "author": "Hyper Potions"
+  },
+  "minecraft:music_disc.mall": {
+    "title": "Mall",
+    "author": "C418"
+  },
+  "minecraft:music_disc.mellohi": {
+    "title": "Mellohi",
+    "author": "C418"
+  },
+  "minecraft:music_disc.otherside": {
+    "title": "otherside",
+    "author": "Lena Raine"
+  },
+  "minecraft:music_disc.pigstep": {
+    "title": "Pigstep",
+    "author": "Lena Raine"
+  },
+  "minecraft:music_disc.precipice": {
+    "title": "Precipice",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:music_disc.relic": {
+    "title": "Relic",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:music_disc.stal": {
+    "title": "Stal",
+    "author": "C418"
+  },
+  "minecraft:music_disc.strad": {
+    "title": "Strad",
+    "author": "C418"
+  },
+  "minecraft:music_disc.tears": {
+    "title": "Tears",
+    "author": "Amos Roddy"
+  },
+  "minecraft:music_disc.wait": {
+    "title": "Wait",
+    "author": "C418"
+  },
+  "minecraft:music_disc.ward": {
+    "title": "Ward",
+    "author": "C418"
+  },
+  "minecraft:records/11": {
+    "title": "11",
+    "author": "C418"
+  },
+  "minecraft:records/13": {
+    "title": "13",
+    "author": "C418"
+  },
+  "minecraft:records/5": {
+    "title": "5",
+    "author": "C418"
+  },
+  "minecraft:records/blocks": {
+    "title": "Blocks",
+    "author": "C418"
+  },
+  "minecraft:records/bounce": {
+    "title": "Bounce",
+    "author": "fingerspit"
+  },
+  "minecraft:records/cat": {
+    "title": "Cat",
+    "author": "C418"
+  },
+  "minecraft:records/chirp": {
+    "title": "Chirp",
+    "author": "C418"
+  },
+  "minecraft:records/creator": {
+    "title": "Creator",
+    "author": "Lena Raine"
+  },
+  "minecraft:records/creator_music_box": {
+    "title": "Creator (Music Box)",
+    "author": "Lena Raine"
+  },
+  "minecraft:records/far": {
+    "title": "Far",
+    "author": "C418"
+  },
+  "minecraft:records/lava_chicken": {
+    "title": "Lava Chicken",
+    "author": "Hyper Potions"
+  },
+  "minecraft:records/mall": {
+    "title": "Mall",
+    "author": "C418"
+  },
+  "minecraft:records/mellohi": {
+    "title": "Mellohi",
+    "author": "C418"
+  },
+  "minecraft:records/otherside": {
+    "title": "otherside",
+    "author": "Lena Raine"
+  },
+  "minecraft:records/pigstep": {
+    "title": "Pigstep",
+    "author": "Lena Raine"
+  },
+  "minecraft:records/precipice": {
+    "title": "Precipice",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:records/relic": {
+    "title": "Relic",
+    "author": "Aaron Cherof"
+  },
+  "minecraft:records/stal": {
+    "title": "Stal",
+    "author": "C418"
+  },
+  "minecraft:records/strad": {
+    "title": "Strad",
+    "author": "C418"
+  },
+  "minecraft:records/tears": {
+    "title": "Tears",
+    "author": "Amos Roddy"
+  },
+  "minecraft:records/wait": {
+    "title": "Wait",
+    "author": "C418"
+  },
+  "minecraft:records/ward": {
+    "title": "Ward",
+    "author": "C418"
+  },
+  "nomansland:music/anachronistic": {
+    "title": "Anachronistic",
+    "author": "Lev Vey"
+  },
+  "nomansland:music/drifter": {
+    "title": "Drifter",
+    "author": "Lev Vey"
+  },
+  "nomansland:music/nomad": {
+    "title": "Nomad",
+    "author": "Lev Vey"
+  },
+  "nomansland:music_disc.guidance": {
+    "title": "Guidance",
+    "author": "Samuel Organ"
+  },
+  "nomansland:records/guidance": {
+    "title": "Guidance",
+    "author": "Samuel Organ"
+  },
+  "aeronautics:music/cirrus": {
+    "title": "Cirrus",
+    "author": "Starlotte"
+  },
+  "aeronautics:music/cloud_skipper": {
+    "title": "Cloud Skipper",
+    "author": "Starlotte"
+  },
+  "aeronautics:music/glide": {
+    "title": "Glide",
+    "author": "Starlotte"
+  },
+  "aeronautics:music/mammatus": {
+    "title": "Mammatus",
+    "author": "Starlotte"
+  },
+  "aeronautics:music/windstream": {
+    "title": "Windstream",
+    "author": "Starlotte"
+  },
+  "aeronautics:music_disc.cloud_skipper": {
+    "title": "Cloud Skipper",
+    "author": "Starlotte"
+  },
+  "create_connected:elevator_music": {
+    "title": "Local Forecast",
+    "author": "Kevin MacLeod"
+  },
+  "create_connected:interlude_music": {
+    "title": "Cassa Bossa Nova",
+    "author": "Kevin Macleod"
+  },
+  "quark:music.endermosh": {
+    "title": "Endermosh",
+    "author": "Kain Vinosec"
+  },
+  "quark:music/endermosh": {
+    "title": "Endermosh",
+    "author": "Kain Vinosec"
+  },
+  "quark:music/glimmering_weald": {
+    "title": "Sacred Places",
+    "author": "Jacob Bind"
+  },
+  "supplementaries:music/heave_ho": {
+    "title": "Heave Ho",
+    "author": "Hlzfss"
+  },
+  "supplementaries:music/pancake": {
+    "title": "Pancake",
+    "author": "Hlzfss"
+  },
+  "supplementaries:music_disc.heave_ho": {
+    "title": "Heave Ho",
+    "author": "Hlzfss"
+  },
+  "supplementaries:music_disc.pancake": {
+    "title": "Pancake",
+    "author": "Hlzfss"
   }
 }
