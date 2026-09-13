@@ -4,13 +4,49 @@ import com.evandev.music_tweaks.config.ModConfig;
 import com.evandev.music_tweaks.config.MusicFrequency;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.util.RandomSource;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MusicManager.class)
 public class MusicManagerMixin {
+
+    @Shadow
+    private int nextSongDelay;
+
+    @Shadow
+    @Nullable
+    private SoundInstance currentMusic;
+
+    @Inject(method = "stopPlaying()V", at = @At("TAIL"))
+    private void musicTweaks$onStopPlaying(CallbackInfo ci) {
+        MusicFrequency frequency = ModConfig.get().musicFrequency;
+
+        if (frequency == MusicFrequency.CONSTANT) {
+            this.nextSongDelay = 20;
+        } else if (frequency == MusicFrequency.FREQUENT) {
+            this.nextSongDelay = 50;
+        } else {
+            this.nextSongDelay = 100;
+        }
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void musicTweaks$clampDelayOnTick(CallbackInfo ci) {
+        if (this.currentMusic == null) {
+            MusicFrequency frequency = ModConfig.get().musicFrequency;
+
+            if (frequency == MusicFrequency.CONSTANT && this.nextSongDelay > 20) {
+                this.nextSongDelay = 20;
+            }
+        }
+    }
 
     @WrapOperation(
             method = "tick",
