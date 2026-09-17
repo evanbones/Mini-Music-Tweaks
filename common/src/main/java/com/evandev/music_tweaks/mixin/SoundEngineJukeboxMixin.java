@@ -18,15 +18,20 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 @Mixin(SoundEngine.class)
 public abstract class SoundEngineJukeboxMixin {
@@ -55,7 +60,7 @@ public abstract class SoundEngineJukeboxMixin {
     private SoundInstance musicTweaks$unwrapEtchedSound(SoundInstance sound) {
         if (sound.getClass().getName().startsWith("gg.moonflower.etched")) {
             try {
-                java.lang.reflect.Method getParentMethod = sound.getClass().getMethod("getParent");
+                Method getParentMethod = sound.getClass().getMethod("getParent");
                 Object parent = getParentMethod.invoke(sound);
                 if (parent instanceof SoundInstance parentSound) {
                     return parentSound;
@@ -182,6 +187,7 @@ public abstract class SoundEngineJukeboxMixin {
         }
 
         boolean hasHearableRecords = fadeOutEnabled && amountRecordsHearable > 0;
+        JukeboxOffsetState.setRecordHearable(hasHearableRecords);
 
         float targetRecordVolume = inCombat ? 0.0f : 1.0f;
         float targetMusicVolume = (inCombat || hasHearableRecords) ? 0.0f : 1.0f;
@@ -200,9 +206,7 @@ public abstract class SoundEngineJukeboxMixin {
         } else if (musicTweaks$currentMusicVolumeFactor > targetMusicVolume) {
             musicTweaks$currentMusicVolumeFactor = Math.max(musicTweaks$currentMusicVolumeFactor - MUSIC_VOLUME_PER_TICK_TO_FADE_OUT, targetMusicVolume);
             musicTweaks$setMusicVolumeAndHandlePausing();
-        } else if (musicTweaks$currentMusicVolumeFactor == 1.0f && musicTweaks$wasMusicPaused) {
-            musicTweaks$setMusicVolumeAndHandlePausing();
-        } else if (musicTweaks$currentMusicVolumeFactor == 0.0f && !musicTweaks$wasMusicPaused) {
+        } else if (musicTweaks$currentMusicVolumeFactor < 1.0f || musicTweaks$wasMusicPaused) {
             musicTweaks$setMusicVolumeAndHandlePausing();
         }
 
@@ -253,22 +257,68 @@ public abstract class SoundEngineJukeboxMixin {
             if (sourceManager == null) continue;
 
             float maxVolume = sound.getVolume();
+            float adjustedVolume = musicTweaks$wrapper.calculateAdjustedVolume(maxVolume * musicTweaks$currentMusicVolumeFactor, SoundSource.MUSIC);
 
             sourceManager.execute(source -> {
-                source.setVolume(musicTweaks$wrapper.calculateAdjustedVolume(maxVolume * musicTweaks$currentMusicVolumeFactor, SoundSource.MUSIC));
+                source.setVolume(adjustedVolume);
 
-                if (musicTweaks$currentMusicVolumeFactor <= 0 && !musicTweaks$wasMusicPaused) {
-                    sourceManager.execute(Channel::pause);
-                } else if (musicTweaks$currentMusicVolumeFactor > 0 && musicTweaks$wasMusicPaused) {
-                    sourceManager.execute(Channel::unpause);
+                if (musicTweaks$currentMusicVolumeFactor <= 0.0f) {
+                    source.pause();
+                } else if (musicTweaks$wasMusicPaused) {
+                    source.unpause();
                 }
             });
         }
 
-        if (musicTweaks$currentMusicVolumeFactor <= 0 && !musicTweaks$wasMusicPaused) {
+        if (musicTweaks$currentMusicVolumeFactor <= 0.0f) {
             musicTweaks$wasMusicPaused = true;
-        } else if (musicTweaks$currentMusicVolumeFactor > 0 && musicTweaks$wasMusicPaused) {
+        } else if (musicTweaks$currentMusicVolumeFactor >= 1.0f) {
             musicTweaks$wasMusicPaused = false;
         }
+    }
+
+    @Inject(method = "resume", at = @At("TAIL"))
+    private void musicTweaks$onSoundEngineResume(CallbackInfo ci) {
+        if (this.musicTweaks$currentMusicVolumeFactor <= 0.0f) {
+            this.musicTweaks$setMusicVolumeAndHandlePausing();
+        }
+    }
+
+    @WrapOperation(
+            method = "updateCategoryVolume",
+            at = @At(value = "INVOKE", target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V")
+    )
+    private void musicTweaks$wrapCategoryVolumeIteration(Map<SoundInstance, ChannelAccess.ChannelHandle> map, BiConsumer<SoundInstance, ChannelAccess.ChannelHandle> originalConsumer, Operation<Void> original) {
+        map.forEach((soundInstance, channelHandle) -> {
+            float f = musicTweaks$wrapper.calculateAdjustedVolume(soundInstance.getVolume(), soundInstance.getSource());
+            if (soundInstance.getSource() == SoundSource.MUSIC && !MusicClientLogic.getInstance().isCombatSound(soundInstance)) {
+                f *= this.musicTweaks$currentMusicVolumeFactor;
+            } else if (soundInstance.getSource() == SoundSource.RECORDS) {
+                f *= this.musicTweaks$currentRecordVolumeFactor;
+            }
+            float finalVolume = f;
+            channelHandle.execute(channel -> {
+                channel.setVolume(finalVolume);
+                if (finalVolume <= 0.0F && soundInstance.getSource() == SoundSource.MUSIC && !MusicClientLogic.getInstance().isCombatSound(soundInstance) && this.musicTweaks$currentMusicVolumeFactor <= 0.0F) {
+                    channel.pause();
+                }
+            });
+        });
+    }
+
+    @ModifyExpressionValue(
+            method = "tickNonPaused",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Options;getSoundSourceVolume(Lnet/minecraft/sounds/SoundSource;)F")
+    )
+    private float musicTweaks$preventStoppingOnZeroVolume(float original) {
+        return 1.0f;
+    }
+
+    @WrapOperation(
+            method = "play",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/SoundInstance;canStartSilent()Z")
+    )
+    private boolean musicTweaks$canStartSilent(SoundInstance instance, Operation<Boolean> original) {
+        return original.call(instance) || instance.getSource() == SoundSource.RECORDS;
     }
 }

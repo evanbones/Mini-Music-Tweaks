@@ -19,7 +19,17 @@ public final class JukeboxOffsetState {
     private static final Map<BlockPos, SoundInstance> CANCELLED_SOUNDS = new ConcurrentHashMap<>();
     private static final Set<BlockPos> IDLE_JUKEBOXES = ConcurrentHashMap.newKeySet();
 
+    private static volatile boolean recordHearable = false;
+
     private JukeboxOffsetState() {
+    }
+
+    public static boolean isRecordHearable() {
+        return recordHearable;
+    }
+
+    public static void setRecordHearable(boolean hearable) {
+        recordHearable = hearable;
     }
 
     public static void markOurSound(SoundInstance sound) {
