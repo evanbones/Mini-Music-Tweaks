@@ -1,3 +1,4 @@
 ### Fixed
 
-- Fixed vanilla bug causing music to stop playing after switching dimensions.
+- Fixed combat music overlapping with regular music when changing music volume.
+- Fixed MC-103511.
