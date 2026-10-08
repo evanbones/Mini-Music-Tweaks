@@ -28,7 +28,7 @@ public class JukeboxSyncRequestMessage {
         ctx.enqueueWork(() -> {
             ServerPlayer player = ctx.getSender();
             if (player != null) {
-                JukeboxSyncNetworking.handleRequestOnServer(player.serverLevel(), pos, (ticks, item) ->
+                JukeboxSyncNetworking.handleRequestOnServer(player.getLevel(), pos, (ticks, item) ->
                         NetworkHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
                                 new JukeboxSyncResponseMessage(pos, ticks, item)));
             }

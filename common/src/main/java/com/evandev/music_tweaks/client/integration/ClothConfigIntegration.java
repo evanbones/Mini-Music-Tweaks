@@ -48,6 +48,12 @@ public class ClothConfigIntegration {
                 .setSaveConsumer(newValue -> config.sounds = newValue)
                 .build());
 
+        general.addEntry(entryBuilder.startStrList(Component.translatable("config.music_tweaks.ignored_damage_sources"), config.ignoredDamageSources)
+                .setDefaultValue(ModConfig.DEFAULT_IGNORED_DAMAGE_SOURCES)
+                .setTooltip(Component.translatable("config.music_tweaks.ignored_damage_sources.tooltip"))
+                .setSaveConsumer(newValue -> config.ignoredDamageSources = newValue)
+                .build());
+
         general.addEntry(entryBuilder.startEnumSelector(Component.translatable("config.music_tweaks.music_frequency"), MusicFrequency.class, config.musicFrequency)
                 .setDefaultValue(MusicFrequency.DEFAULT)
                 .setTooltip(Component.translatable("config.music_tweaks.music_frequency.tooltip"))

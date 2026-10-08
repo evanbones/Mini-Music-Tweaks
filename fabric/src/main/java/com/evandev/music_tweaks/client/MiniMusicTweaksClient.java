@@ -4,6 +4,7 @@ import com.evandev.music_tweaks.Constants;
 import com.evandev.music_tweaks.client.music.MusicClientLogic;
 import com.evandev.music_tweaks.client.music.MusicEventListener;
 import com.evandev.music_tweaks.client.music.MusicHandler;
+import com.evandev.music_tweaks.network.CombatDamageNetworking;
 import com.evandev.music_tweaks.network.JukeboxSyncNetworking;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -56,6 +57,11 @@ public class MiniMusicTweaksClient implements ClientModInitializer {
             long ticks = JukeboxSyncNetworking.readResponseTicks(buf);
             ItemStack item = JukeboxSyncNetworking.readResponseItem(buf);
             client.execute(() -> JukeboxSyncNetworking.handleResponseOnClient(pos, ticks, item));
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(CombatDamageNetworking.DAMAGE_ID, (client, handler, buf, responseSender) -> {
+            String damageSourceId = CombatDamageNetworking.readDamage(buf);
+            client.execute(() -> CombatDamageNetworking.handleDamageOnClient(damageSourceId));
         });
     }
 }

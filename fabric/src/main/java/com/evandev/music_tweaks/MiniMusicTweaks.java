@@ -15,7 +15,7 @@ public class MiniMusicTweaks implements ModInitializer {
 
         ServerPlayNetworking.registerGlobalReceiver(JukeboxSyncNetworking.REQUEST_ID, (server, player, handler, buf, responseSender) -> {
             BlockPos pos = JukeboxSyncNetworking.readRequest(buf);
-            server.execute(() -> JukeboxSyncNetworking.handleRequestOnServer(player.serverLevel(), pos, (ticks, item) -> {
+            server.execute(() -> JukeboxSyncNetworking.handleRequestOnServer(player.getLevel(), pos, (ticks, item) -> {
                 FriendlyByteBuf response = PacketByteBufs.create();
                 JukeboxSyncNetworking.writeResponse(response, pos, ticks, item);
                 ServerPlayNetworking.send(player, JukeboxSyncNetworking.RESPONSE_ID, response);

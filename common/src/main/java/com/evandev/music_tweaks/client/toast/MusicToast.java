@@ -2,9 +2,11 @@ package com.evandev.music_tweaks.client.toast;
 
 import com.evandev.music_tweaks.client.music.MusicHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.renderer.GameRenderer;
@@ -12,10 +14,9 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.awt.*;
 
 public class MusicToast implements Toast {
     private static MusicToast activeMusicToast;
@@ -83,7 +84,7 @@ public class MusicToast implements Toast {
     }
 
     @Override
-    public @NotNull Visibility render(GuiGraphics guiGraphics, @NotNull ToastComponent toastComponent, long timeSinceLastVisible) {
+    public @NotNull Visibility render(@NotNull PoseStack poseStack, @NotNull ToastComponent toastComponent, long timeSinceLastVisible) {
         MusicToast active = getActiveToast();
         if (active != null && active != this) {
             return Visibility.HIDE;
@@ -93,7 +94,7 @@ public class MusicToast implements Toast {
         RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        guiGraphics.blit(TEXTURE, 0, 0, 0, 0, this.width(), this.height());
+        toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
 
         if (iconTexture != null) {
             int iconX = 8;
@@ -120,27 +121,29 @@ public class MusicToast implements Toast {
             }
 
             float hue = (time % 6000L) / 6000.0f;
-            int color = Color.HSBtoRGB(hue, 1.0f, 1.0f);
+            int color = Mth.hsvToRgb(hue, 1.0f, 1.0f);
             float r = ((color >> 16) & 0xFF) / 255.0f;
             float g = ((color >> 8) & 0xFF) / 255.0f;
             float b = (color & 0xFF) / 255.0f;
 
+            RenderSystem.setShaderTexture(0, iconTexture);
             RenderSystem.setShaderColor(r, g, b, 1.0F);
-            guiGraphics.blit(iconTexture, iconX, iconY, 0, vOffset, 16, 16, 16, texHeight);
+            GuiComponent.blit(poseStack, iconX, iconY, 0, vOffset, 16, 16, 16, texHeight);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         } else if (iconItem != null) {
-            guiGraphics.renderFakeItem(iconItem, 8, 8);
+            toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(iconItem, 8, 8);
         }
 
+        Font font = toastComponent.getMinecraft().font;
         int textLeft = 30;
         boolean hasAuthor = !music.author().getString().isEmpty();
 
         if (hasAuthor) {
-            guiGraphics.drawString(toastComponent.getMinecraft().font, music.title(), textLeft, 7, 0xFFFFFF00);
-            guiGraphics.drawString(toastComponent.getMinecraft().font, music.author(), textLeft, 18, 0xFFFFFFFF);
+            font.draw(poseStack, music.title(), textLeft, 7, 0xFFFFFF00);
+            font.draw(poseStack, music.author(), textLeft, 18, 0xFFFFFFFF);
         } else {
-            guiGraphics.drawString(toastComponent.getMinecraft().font, music.title(), textLeft, 12, 0xFFFFFF00);
+            font.draw(poseStack, music.title(), textLeft, 12, 0xFFFFFF00);
         }
 
         return Util.getMillis() - this.startTime >= 5000L ? Visibility.HIDE : Visibility.SHOW;

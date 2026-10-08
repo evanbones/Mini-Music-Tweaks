@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.sounds.WeighedSoundEvents;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
@@ -59,9 +59,9 @@ public class MusicEventListener implements SoundEventListener {
     }
 
     private RecordItem findDiscBySound(SoundInstance sound) {
-        ResourceLocation playingLocation = sound.getLocation();
+        ResourceLocation playingLocation = resolveEtchedLocation(sound);
 
-        for (Item item : BuiltInRegistries.ITEM) {
+        for (Item item : Registry.ITEM) {
             if (item instanceof RecordItem disc) {
                 if (disc.getSound().getLocation().equals(playingLocation)) {
                     return disc;
@@ -69,5 +69,24 @@ public class MusicEventListener implements SoundEventListener {
             }
         }
         return null;
+    }
+
+    private static ResourceLocation resolveEtchedLocation(SoundInstance sound) {
+        ResourceLocation location = sound.getLocation();
+        if (!location.getNamespace().equals("etched")) return location;
+
+        try {
+            Object innerSound = sound.getSound();
+            if (innerSound.getClass().getName().equals("gg.moonflower.etched.api.sound.AbstractOnlineSoundInstance$OnlineSound")) {
+                String url = (String) innerSound.getClass().getMethod("getURL").invoke(innerSound);
+                if (url != null && !url.contains("://")) {
+                    ResourceLocation parsed = ResourceLocation.tryParse(url);
+                    if (parsed != null) return parsed;
+                }
+            }
+        } catch (ReflectiveOperationException | ClassCastException e) {
+            Constants.LOG.debug("Failed to extract Etched sound URL", e);
+        }
+        return location;
     }
 }

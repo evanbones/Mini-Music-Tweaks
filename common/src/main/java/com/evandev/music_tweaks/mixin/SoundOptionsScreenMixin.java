@@ -2,68 +2,121 @@ package com.evandev.music_tweaks.mixin;
 
 import com.evandev.music_tweaks.config.ModConfig;
 import com.evandev.music_tweaks.config.MusicFrequency;
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.OptionInstance;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.TooltipAccessor;
+import net.minecraft.client.gui.screens.OptionsSubScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(SoundOptionsScreen.class)
-public abstract class SoundOptionsScreenMixin {
+public abstract class SoundOptionsScreenMixin extends OptionsSubScreen {
+    @Unique
+    private static final int musicTweaks$ROW_HEIGHT = 22;
 
-    @ModifyReturnValue(method = "buttonOptions", at = @At("RETURN"))
-    private static OptionInstance<?>[] musicTweaks$appendMiscOptions(OptionInstance<?>[] original) {
-        OptionInstance<MusicFrequency> frequencyOption = new OptionInstance<>(
-                "config.music_tweaks.music_frequency",
-                OptionInstance.noTooltip(),
-                (label, value) -> value.getDisplayName(),
-                new OptionInstance.Enum<>(List.of(MusicFrequency.values()), MusicFrequency.CODEC),
-                ModConfig.get().musicFrequency,
-                value -> {
-                    ModConfig.get().musicFrequency = value;
-                    ModConfig.save();
-                }
-        );
+    @Unique
+    private final List<AbstractWidget> musicTweaks$widgets = new ArrayList<>();
+    @Unique
+    private int musicTweaks$extraRowY = -1;
 
-        OptionInstance<Boolean> toastOption = OptionInstance.createBoolean(
-                "config.music_tweaks.show_music_toast",
-                OptionInstance.cachedConstantTooltip(Component.translatable("config.music_tweaks.show_music_toast.tooltip")),
-                (label, value) -> value ? Component.literal("ON") : Component.literal("OFF"),
-                ModConfig.get().showMusicToast,
-                value -> {
-                    ModConfig.get().showMusicToast = value;
-                    ModConfig.save();
-                }
-        );
-
-        OptionInstance<?>[] newArray = Arrays.copyOf(original, original.length + 2);
-        newArray[original.length] = frequencyOption;
-        newArray[original.length + 1] = toastOption;
-
-        return newArray;
+    public SoundOptionsScreenMixin(Screen lastScreen, Options options, Component title) {
+        super(lastScreen, options, title);
     }
 
-    @ModifyReturnValue(method = "getAllSoundOptionsExceptMaster", at = @At("RETURN"))
-    private OptionInstance<?>[] musicTweaks$appendJukeboxToSoundList(OptionInstance<?>[] original) {
-        OptionInstance<Integer> jukeboxOption = new OptionInstance<>(
+    @Unique
+    private static boolean musicTweaks$hasFreeSliderSlot() {
+        return (SoundSource.values().length - 1) % 2 == 1;
+    }
+
+    @WrapOperation(method = "init", at = @At(value = "NEW", target = "net/minecraft/client/gui/components/Button"))
+    private Button musicTweaks$moveDoneButton(int x, int y, int width, int height, Component message, Button.OnPress onPress, Operation<Button> original) {
+        this.musicTweaks$extraRowY = y;
+        int extraRows = musicTweaks$hasFreeSliderSlot() ? 1 : 2;
+        return original.call(x, y + musicTweaks$ROW_HEIGHT * extraRows, width, height, message, onPress);
+    }
+
+    @Inject(method = "init", at = @At("TAIL"))
+    private void musicTweaks$addMusicOptions(CallbackInfo ci) {
+        this.musicTweaks$widgets.clear();
+        if (this.musicTweaks$extraRowY == -1) return;
+
+        ModConfig config = ModConfig.get();
+        int left = this.width / 2 - 155;
+        int right = this.width / 2 + 5;
+        int row = this.musicTweaks$extraRowY;
+
+        OptionInstance<Integer> jukeboxDistance = new OptionInstance<>(
                 "config.music_tweaks.jukebox_distance",
-                OptionInstance.noTooltip(),
-                (label, val) -> Component.translatable("config.music_tweaks.jukebox_distance").append(": " + val),
+                OptionInstance.cachedConstantTooltip(Component.translatable("config.music_tweaks.jukebox_distance.tooltip")),
+                Options::genericValueLabel,
                 new OptionInstance.IntRange(0, 256),
-                (int) ModConfig.get().jukeboxDistance,
-                value -> {
-                    ModConfig.get().jukeboxDistance = value.doubleValue();
-                    ModConfig.save();
-                }
+                (int) config.jukeboxDistance,
+                value -> config.jukeboxDistance = value
         );
 
-        OptionInstance<?>[] newArray = Arrays.copyOf(original, original.length + 1);
-        newArray[original.length] = jukeboxOption;
+        OptionInstance<MusicFrequency> musicFrequency = new OptionInstance<>(
+                "config.music_tweaks.music_frequency",
+                OptionInstance.cachedConstantTooltip(Component.translatable("config.music_tweaks.music_frequency.tooltip")),
+                (caption, value) -> value.getDisplayName(),
+                new OptionInstance.Enum<>(List.of(MusicFrequency.values()), MusicFrequency.CODEC),
+                config.musicFrequency,
+                value -> config.musicFrequency = value
+        );
 
-        return newArray;
+        OptionInstance<Boolean> showMusicToast = OptionInstance.createBoolean(
+                "config.music_tweaks.show_music_toast",
+                OptionInstance.cachedConstantTooltip(Component.translatable("config.music_tweaks.show_music_toast.tooltip")),
+                config.showMusicToast,
+                value -> config.showMusicToast = value
+        );
+
+        if (musicTweaks$hasFreeSliderSlot()) {
+            int sliderIndex = 2 + SoundSource.values().length - 1;
+            int sliderY = this.height / 6 - 12 + musicTweaks$ROW_HEIGHT * (sliderIndex >> 1);
+            musicTweaks$add(jukeboxDistance.createButton(this.options, right, sliderY, 150));
+            musicTweaks$add(musicFrequency.createButton(this.options, left, row, 150));
+            musicTweaks$add(showMusicToast.createButton(this.options, right, row, 150));
+        } else {
+            musicTweaks$add(jukeboxDistance.createButton(this.options, left, row, 310));
+            musicTweaks$add(musicFrequency.createButton(this.options, left, row + musicTweaks$ROW_HEIGHT, 150));
+            musicTweaks$add(showMusicToast.createButton(this.options, right, row + musicTweaks$ROW_HEIGHT, 150));
+        }
+    }
+
+    @Unique
+    private void musicTweaks$add(AbstractWidget widget) {
+        this.musicTweaks$widgets.add(widget);
+        this.addRenderableWidget(widget);
+    }
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void musicTweaks$renderTooltips(PoseStack poseStack, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
+        for (AbstractWidget widget : this.musicTweaks$widgets) {
+            if (widget.isMouseOver(mouseX, mouseY) && widget instanceof TooltipAccessor tooltipAccessor) {
+                this.renderTooltip(poseStack, tooltipAccessor.getTooltip(), mouseX, mouseY);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void removed() {
+        super.removed();
+        ModConfig.save();
     }
 }

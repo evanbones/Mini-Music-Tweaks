@@ -2,6 +2,7 @@ package com.evandev.music_tweaks.mixin;
 
 import com.evandev.music_tweaks.client.jukebox.JukeboxOffsetState;
 import com.evandev.music_tweaks.client.jukebox.JukeboxSyncHandler;
+import com.evandev.music_tweaks.network.JukeboxSyncNetworking;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -24,7 +25,7 @@ public class ClientPacketListenerJukeboxMixin {
             ci.cancel();
             CompoundTag nbt = packet.getTag();
             if (nbt != null) {
-                long ticksSinceStart = nbt.getLong("ticks_since_song_started");
+                long ticksSinceStart = JukeboxSyncNetworking.getTicksSinceSongStarted(nbt);
                 CompoundTag recordNbt = nbt.getCompound("RecordItem");
 
                 if (!recordNbt.isEmpty()) {

@@ -1,18 +1,19 @@
 package com.evandev.music_tweaks.client.music;
 
 import com.evandev.music_tweaks.Constants;
-import com.evandev.music_tweaks.ModTags;
 import com.evandev.music_tweaks.config.ModConfig;
+import com.evandev.music_tweaks.platform.Services;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.AABB;
 
@@ -25,6 +26,7 @@ public class MusicClientLogic {
     private boolean inCombat = false;
     private int ticksSinceCombatUpdate = 0;
     private boolean combatDamageTaken = false;
+    private boolean unconfirmedDamageTaken = false;
 
     private MusicClientLogic() {
     }
@@ -44,9 +46,16 @@ public class MusicClientLogic {
         return inCombat;
     }
 
-    public void onPlayerDamaged(DamageSource damageSource) {
-        if (damageSource.is(ModTags.DOES_NOT_TRIGGER_COMBAT_MUSIC)) return;
+    public void onPlayerDamaged(String damageSourceId) {
+        if (ModConfig.get().ignoredDamageSources.contains(damageSourceId)) return;
         combatDamageTaken = true;
+    }
+
+    public void onPlayerEntityEvent(byte eventId) {
+        if (Services.PLATFORM.isModLoadedOnServer()) return;
+        if (eventId == EntityEvent.HURT || eventId == EntityEvent.THORNED) {
+            unconfirmedDamageTaken = true;
+        }
     }
 
     public void onClientTick(Minecraft mc) {
@@ -55,6 +64,13 @@ public class MusicClientLogic {
 
         LocalPlayer player = mc.player;
         if (player == null) return;
+
+        if (unconfirmedDamageTaken) {
+            unconfirmedDamageTaken = false;
+            if (hasNearbyEnemy(player)) {
+                combatDamageTaken = true;
+            }
+        }
 
         if (combatDamageTaken) {
             combatDamageTaken = false;
@@ -113,6 +129,19 @@ public class MusicClientLogic {
         ).size();
     }
 
+    private boolean hasNearbyEnemy(LocalPlayer player) {
+        if (player.isCreative() || player.isSpectator()) {
+            return false;
+        }
+
+        AABB box = player.getBoundingBox().inflate(16.0D);
+        return !player.clientLevel.getEntitiesOfClass(
+                LivingEntity.class,
+                box,
+                entity -> entity instanceof Enemy && entity.isAlive()
+        ).isEmpty();
+    }
+
     private SoundEvent pickSound(RandomSource rand, ModConfig config) {
         List<String> soundList = config.sounds;
         if (soundList.isEmpty()) return null;
@@ -121,7 +150,7 @@ public class MusicClientLogic {
         String soundStr = soundList.get(idx).trim();
 
         ResourceLocation soundLocation = new ResourceLocation(soundStr);
-        SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(soundLocation);
+        SoundEvent sound = Registry.SOUND_EVENT.get(soundLocation);
 
         if (sound == null) {
             Constants.LOG.error("Invalid sound event resource location detected: {}", soundStr);

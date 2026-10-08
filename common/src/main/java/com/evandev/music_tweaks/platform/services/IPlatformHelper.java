@@ -1,6 +1,7 @@
 package com.evandev.music_tweaks.platform.services;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.nio.file.Path;
 
@@ -59,4 +60,9 @@ public interface IPlatformHelper {
      * Sends the custom jukebox sync request to the server.
      */
     void sendJukeboxSyncRequest(BlockPos pos);
+
+    /**
+     * Tells a player's client which damage source hurt them, if their client has this mod.
+     */
+    void sendCombatDamage(ServerPlayer player, String damageSourceId);
 }

@@ -77,7 +77,7 @@ public abstract class SoundEngineJukeboxMixin {
 
         if (p_sound.getSource() == SoundSource.RECORDS) {
             if (p_sound.isLooping()) {
-                BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
+                BlockPos blockPos = new BlockPos(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 Minecraft client = Minecraft.getInstance();
 
                 if (client.level != null) {
@@ -87,7 +87,7 @@ public abstract class SoundEngineJukeboxMixin {
                     }
                 }
             } else if (!isOurSound && p_sound instanceof SimpleSoundInstance && !p_sound.isRelative()) {
-                BlockPos blockPos = BlockPos.containing(p_sound.getX(), p_sound.getY(), p_sound.getZ());
+                BlockPos blockPos = new BlockPos(p_sound.getX(), p_sound.getY(), p_sound.getZ());
                 Minecraft client = Minecraft.getInstance();
 
                 if (client.level != null && client.getConnection() != null) {

@@ -1,7 +1,10 @@
 package com.evandev.music_tweaks.network;
 
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+
+import java.util.Optional;
 
 public final class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
@@ -22,5 +25,8 @@ public final class NetworkHandler {
                 JukeboxSyncRequestMessage::encode, JukeboxSyncRequestMessage::new, JukeboxSyncRequestMessage::handle);
         CHANNEL.registerMessage(id++, JukeboxSyncResponseMessage.class,
                 JukeboxSyncResponseMessage::encode, JukeboxSyncResponseMessage::new, JukeboxSyncResponseMessage::handle);
+        CHANNEL.registerMessage(id++, CombatDamageMessage.class,
+                CombatDamageMessage::encode, CombatDamageMessage::new, CombatDamageMessage::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 }

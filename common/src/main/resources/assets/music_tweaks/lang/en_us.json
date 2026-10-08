@@ -14,6 +14,9 @@
   "config.music_tweaks.sounds": "Combat Music Sounds",
   "config.music_tweaks.sounds.tooltip": "List of SoundEvent Resource Locations that can be chosen for combat music.",
 
+  "config.music_tweaks.ignored_damage_sources": "Ignored Damage Sources",
+  "config.music_tweaks.ignored_damage_sources.tooltip": "Damage source IDs (e.g. fall, lava, drown) that will not trigger combat music. Only used when the server also has Mini Music Tweaks; otherwise hits only count when an enemy is nearby.",
+
   "config.music_tweaks.music_frequency": "Music Frequency",
   "config.music_tweaks.music_frequency.tooltip": "Controls how often vanilla background music plays. Default is normal.",
 

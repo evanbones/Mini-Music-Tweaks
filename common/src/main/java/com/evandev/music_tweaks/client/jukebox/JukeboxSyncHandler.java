@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class JukeboxSyncHandler {
+    private static final TagKey<Item> QUARK_AMBIENT_DISCS = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation("quark", "ambient"));
+
     public static void playSyncedSong(BlockPos pos, long ticksSinceStart, ItemStack recordItem) {
         Minecraft client = Minecraft.getInstance();
         client.execute(() -> {
@@ -24,17 +26,15 @@ public class JukeboxSyncHandler {
             if (world != null) {
                 BlockState state = world.getBlockState(pos);
                 if (state.hasProperty(JukeboxBlock.HAS_RECORD) && state.getValue(JukeboxBlock.HAS_RECORD)) {
-                    if (!JukeboxOffsetState.hasActiveSound(pos)) {
+                    if (ticksSinceStart < 0L) {
+                        JukeboxOffsetState.removeCancelledSound(pos);
+                        JukeboxOffsetState.markIdle(pos);
+                    } else if (!JukeboxOffsetState.hasActiveSound(pos)) {
                         if (!recordItem.isEmpty() && recordItem.getItem() instanceof RecordItem record) {
                             JukeboxOffsetState.removeCancelledSound(pos);
                             SoundEvent soundEvent = record.getSound();
 
-                            TagKey<Item> ambientTag = TagKey.create(
-                                    Registries.ITEM,
-                                    new ResourceLocation("quark", "ambient")
-                            );
-
-                            if (recordItem.is(ambientTag)) {
+                            if (recordItem.is(QUARK_AMBIENT_DISCS)) {
                                 SimpleSoundInstance instance = new SimpleSoundInstance(
                                         soundEvent.getLocation(),
                                         SoundSource.RECORDS,

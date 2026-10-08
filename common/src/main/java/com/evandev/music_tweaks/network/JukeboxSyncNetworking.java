@@ -47,18 +47,17 @@ public final class JukeboxSyncNetworking {
         return buf.readItem();
     }
 
+    public static long getTicksSinceSongStarted(CompoundTag jukeboxNbt) {
+        if (!jukeboxNbt.getBoolean("IsPlaying")) {
+            return -1L;
+        }
+        return Math.max(0L, jukeboxNbt.getLong("TickCount") - jukeboxNbt.getLong("RecordStartTick"));
+    }
+
     public static void handleRequestOnServer(ServerLevel level, BlockPos pos, BiConsumer<Long, ItemStack> responder) {
         if (level.getBlockEntity(pos) instanceof JukeboxBlockEntity jukebox) {
-            CompoundTag nbt = jukebox.saveWithFullMetadata();
-            long ticks = nbt.getLong("ticks_since_song_started");
-            CompoundTag recordNbt = nbt.getCompound("RecordItem");
-
-            if (!recordNbt.isEmpty()) {
-                ItemStack item = ItemStack.of(recordNbt);
-                if (!item.isEmpty()) {
-                    responder.accept(ticks, item);
-                }
-            }
+            CompoundTag nbt = jukebox.saveWithoutMetadata();
+            responder.accept(getTicksSinceSongStarted(nbt), jukebox.getRecord().copy());
         }
     }
 

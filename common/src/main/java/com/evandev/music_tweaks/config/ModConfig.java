@@ -18,6 +18,13 @@ public class ModConfig {
     private static final File CONFIG_FILE = Services.PLATFORM.getConfigDirectory().resolve("music_tweaks.json").toFile();
     private static ModConfig INSTANCE;
 
+    // rip damage type tags
+    public static final List<String> DEFAULT_IGNORED_DAMAGE_SOURCES = List.of(
+            "anvil", "badRespawnPoint", "cactus", "cramming", "drown", "dryout", "fall", "fallingBlock",
+            "fallingStalactite", "flyIntoWall", "freeze", "hotFloor", "inFire", "inWall", "lava",
+            "lightningBolt", "onFire", "outOfWorld", "stalagmite", "starve", "sweetBerryBush"
+    );
+
     @SerializedName("enabled")
     public boolean enabled = false;
 
@@ -29,6 +36,9 @@ public class ModConfig {
 
     @SerializedName("sounds")
     public List<String> sounds = new ArrayList<>(List.of("minecraft:music_disc.pigstep", "minecraft:music_disc.mellohi"));
+
+    @SerializedName("ignored_damage_sources")
+    public List<String> ignoredDamageSources = new ArrayList<>(DEFAULT_IGNORED_DAMAGE_SOURCES);
 
     @SerializedName("music_frequency")
     public MusicFrequency musicFrequency = MusicFrequency.DEFAULT;

@@ -47,9 +47,6 @@ dependencies {
     implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}"))
     annotationProcessor "io.github.llamalad7:mixinextras-common:${mixinextras_version}"
 
-    // EMI
-    modRuntimeOnly "dev.emi:emi-forge:${emi_version}"
-
     // Cloth Config
     modImplementation "me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}"
 
