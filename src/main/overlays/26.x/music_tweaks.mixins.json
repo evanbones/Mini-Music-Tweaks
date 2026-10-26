@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.evandev.music_tweaks.mixin",
+  "compatibilityLevel": "JAVA_${java_version}",
+  "mixins": [],
+  "client": [
+    "AbstractSoundInstanceWrapper",
+    "ClientLevelJukeboxMixin",
+    "ClientPacketListenerJukeboxMixin",
+    "LivingEntityDamageMixin",
+    "MusicManagerMixin",
+    "SoundBufferLibraryMixin",
+    "SoundEngineJukeboxMixin",
+    "SoundEngineWrapper",
+    "SoundOptionsScreenMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${description}",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "homepage": "https://github.com/evanbones/Mini-Music-Tweaks",
+    "sources": "https://github.com/evanbones/Mini-Music-Tweaks",
+    "issues": "https://github.com/evanbones/Mini-Music-Tweaks/issues"
+  },
+  "license": "${license}",
+  "icon": "${mod_id}.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.evandev.music_tweaks.fabric.MiniMusicTweaksFabric"
+    ],
+    "client": [
+      "com.evandev.music_tweaks.fabric.MiniMusicTweaksFabricClient"
+    ],
+    "modmenu": [
+      "com.evandev.music_tweaks.fabric.compat.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "${mod_id}.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft}",
+    "java": ">=${java_version}"
+  },
+  "suggests": {
+    "yet_another_config_lib_v3": ">=${yacl_version}",
+    "modmenu": "*"
+  }
+}

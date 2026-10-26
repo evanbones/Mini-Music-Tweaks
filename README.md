@@ -16,18 +16,23 @@ music, the music toast notifications from 1.21.6, and overhauled jukebox audio.
 * **Music Toasts ("Now Playing")**
     * Whenever background music or a music disc starts playing, a toast notification will
       slide in showing the track's title and author.
-    * This is a backported feature from 1.21.6.
+    * This is a backported feature from 1.21.6, so it's only added on 1.20.1 and 1.21.1.
 * **Better Jukeboxes**
     * Vanilla music now smoothly crossfades with jukebox music, based on distance from the jukebox.
     * Replaces the default jukebox audio falloff with a system that smoothly crossfades and adjusts
       volume based on your distance from the jukebox.
     * Jukebox music now plays in mono, fixing the annoying "orbital" effect when not facing the jukebox directly.
+    * Jukeboxes resume from the right point in the song after relogging or coming back into range. Install the mod on
+      the server too for this to work for everyone, not just operators. The mod is optional on both sides.
 * **Music Frequency**
     * Added a config option to change the frequency of in-game background music (default, frequent, or constant).
-    * This is another backported feature from 1.21.6.
+    * This is another backported feature from 1.21.6, so it's only added on 1.20.1 and 1.21.1.
 * **Vanilla Sound Options Integration**
     * Easily adjust music frequency, toggle music toasts, and adjust jukebox distance directly from the vanilla sound
       options screen.
+
+Everything can be configured in-game with [YACL](https://modrinth.com/mod/yacl) installed, through Mod Menu on
+Fabric or the mods list on Forge and NeoForge.
 
 ## Modpack / Resource Pack Support
 
@@ -36,7 +41,7 @@ titles and authors for any track by including a `music_tweaks/musics.json` file.
 
 ## License
 
-[![Code license (MIT)](https://img.shields.io/badge/code%20license-MIT-green.svg?style=flat-square)](https://github.com/evanbones/Mini-Music-Tweaks/blob/1.20.1/LICENSE)
+[![Code license (MIT)](https://img.shields.io/badge/code%20license-MIT-green.svg?style=flat-square)](https://github.com/evanbones/Mini-Music-Tweaks/blob/stonecutter/LICENSE)
 
 ---
 
