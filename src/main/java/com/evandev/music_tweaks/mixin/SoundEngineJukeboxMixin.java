@@ -255,8 +255,13 @@ public abstract class SoundEngineJukeboxMixin {
         List<String> fadeSounds = ModConfig.get().musicFadeSounds;
         if (fadeSounds.isEmpty()) return false;
         for (Map.Entry<SoundInstance, ChannelAccess.ChannelHandle> entry : musicTweaks$wrapper.getInstanceToChannel().entrySet()) {
-            if (entry.getKey().getSource() != SoundSource.MUSIC && !entry.getValue().isStopped()
-                    && fadeSounds.contains(entry.getKey().getLocation().toString())) {
+            if (entry.getKey().getSource() == SoundSource.MUSIC || entry.getValue().isStopped()) continue;
+            //? if >=26.1 {
+            /*String id = entry.getKey().getIdentifier().toString();
+            *///?} else {
+            String id = entry.getKey().getLocation().toString();
+            //?}
+            if (fadeSounds.contains(id)) {
                 return true;
             }
         }
