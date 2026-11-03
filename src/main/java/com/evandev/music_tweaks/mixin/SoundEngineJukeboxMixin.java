@@ -46,6 +46,10 @@ public abstract class SoundEngineJukeboxMixin {
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_OUT = 1f / TICKS_TO_FULLY_FADE_OUT;
     @Unique
     private static final float MUSIC_VOLUME_PER_TICK_TO_FADE_IN = 1f / TICKS_TO_FULLY_FADE_IN;
+    @Unique
+    private static final float MUSIC_VOLUME_PER_TICK_TO_QUICK_FADE_OUT = 1f / 6;
+    @Unique
+    private static final float MUSIC_VOLUME_PER_TICK_TO_QUICK_FADE_IN = 1f / 20;
 
     @Unique
     private static final Map<SoundInstance, Vec3> musicTweaks$coordinates = new HashMap<>();
@@ -58,6 +62,8 @@ public abstract class SoundEngineJukeboxMixin {
     private float musicTweaks$currentRecordVolumeFactor = 1f;
     @Unique
     private boolean musicTweaks$wasMusicPaused = false;
+    @Unique
+    private boolean musicTweaks$quickMusicFade = false;
 
     @Unique
     private SoundInstance musicTweaks$unwrapEtchedSound(SoundInstance sound) {
@@ -199,7 +205,15 @@ public abstract class SoundEngineJukeboxMixin {
         JukeboxOffsetState.setRecordHearable(hasHearableRecords);
 
         float targetRecordVolume = inCombat ? 0.0f : 1.0f;
-        float targetMusicVolume = (inCombat || hasHearableRecords || musicTweaks$isFadeSoundPlaying()) ? 0.0f : 1.0f;
+        boolean fadeSoundPlaying = musicTweaks$isFadeSoundPlaying();
+        if (inCombat || hasHearableRecords) {
+            musicTweaks$quickMusicFade = false;
+        } else if (fadeSoundPlaying) {
+            musicTweaks$quickMusicFade = true;
+        }
+        float musicFadeIn = musicTweaks$quickMusicFade ? MUSIC_VOLUME_PER_TICK_TO_QUICK_FADE_IN : MUSIC_VOLUME_PER_TICK_TO_FADE_IN;
+        float musicFadeOut = musicTweaks$quickMusicFade ? MUSIC_VOLUME_PER_TICK_TO_QUICK_FADE_OUT : MUSIC_VOLUME_PER_TICK_TO_FADE_OUT;
+        float targetMusicVolume = (inCombat || hasHearableRecords || fadeSoundPlaying) ? 0.0f : 1.0f;
 
         // Jukebox Fade
         if (musicTweaks$currentRecordVolumeFactor < targetRecordVolume) {
@@ -210,10 +224,10 @@ public abstract class SoundEngineJukeboxMixin {
 
         // Vanilla Music Fade
         if (musicTweaks$currentMusicVolumeFactor < targetMusicVolume) {
-            musicTweaks$currentMusicVolumeFactor = Math.min(musicTweaks$currentMusicVolumeFactor + MUSIC_VOLUME_PER_TICK_TO_FADE_IN, targetMusicVolume);
+            musicTweaks$currentMusicVolumeFactor = Math.min(musicTweaks$currentMusicVolumeFactor + musicFadeIn, targetMusicVolume);
             musicTweaks$setMusicVolumeAndHandlePausing();
         } else if (musicTweaks$currentMusicVolumeFactor > targetMusicVolume) {
-            musicTweaks$currentMusicVolumeFactor = Math.max(musicTweaks$currentMusicVolumeFactor - MUSIC_VOLUME_PER_TICK_TO_FADE_OUT, targetMusicVolume);
+            musicTweaks$currentMusicVolumeFactor = Math.max(musicTweaks$currentMusicVolumeFactor - musicFadeOut, targetMusicVolume);
             musicTweaks$setMusicVolumeAndHandlePausing();
         } else if (musicTweaks$currentMusicVolumeFactor < 1.0f || musicTweaks$wasMusicPaused) {
             musicTweaks$setMusicVolumeAndHandlePausing();
