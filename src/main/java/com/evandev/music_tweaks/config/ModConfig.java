@@ -15,6 +15,7 @@ import java.util.List;
 
 public class ModConfig {
     public static final List<String> DEFAULT_SOUNDS = List.of("minecraft:music_disc.pigstep", "minecraft:music_disc.mellohi");
+    public static final List<String> DEFAULT_MUSIC_FADE_SOUNDS = List.of("minecraft:ui.toast.challenge_complete", "advancementplaques:ui.toast.task_complete", "advancementplaques:ui.toast.goal_complete");
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONFIG_FILE = Services.PLATFORM.getConfigDirectory().resolve("music_tweaks.json").toFile();
@@ -40,6 +41,9 @@ public class ModConfig {
 
     @SerializedName("jukebox_distance")
     public double jukeboxDistance = 64.0;
+
+    @SerializedName("music_fade_sounds")
+    public List<String> musicFadeSounds = new ArrayList<>(DEFAULT_MUSIC_FADE_SOUNDS);
 
     //? if <26.1 {
     @SerializedName("music_frequency")

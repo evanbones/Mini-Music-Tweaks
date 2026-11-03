@@ -47,6 +47,14 @@ public class YACLIntegration {
                 .initial("")
                 .build();
 
+        ListOption<String> musicFadeSounds = ListOption.<String>createBuilder()
+                .name(Component.translatable("config.music_tweaks.music_fade_sounds"))
+                .description(OptionDescription.of(Component.translatable("config.music_tweaks.music_fade_sounds.tooltip")))
+                .binding(ModConfig.DEFAULT_MUSIC_FADE_SOUNDS, () -> config.musicFadeSounds, val -> config.musicFadeSounds = new ArrayList<>(val))
+                .controller(StringControllerBuilder::create)
+                .initial("")
+                .build();
+
         //? if <26.1 {
         OptionGroup.Builder music = OptionGroup.createBuilder()
                 .name(Component.translatable("config.music_tweaks.group.music"));
@@ -95,7 +103,8 @@ public class YACLIntegration {
                 //? if <26.1 {
                 .group(music.build())
                 //?}
-                .group(jukeboxes);
+                .group(jukeboxes)
+                .group(musicFadeSounds);
 
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("config.music_tweaks.title"))

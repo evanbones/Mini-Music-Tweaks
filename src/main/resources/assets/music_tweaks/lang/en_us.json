@@ -29,6 +29,9 @@
   "config.music_tweaks.jukebox_fade_out": "Jukebox Music Fade Out",
   "config.music_tweaks.jukebox_fade_out.tooltip": "Fades out background music when near a playing jukebox.",
 
+  "config.music_tweaks.music_fade_sounds": "Music Fade Sounds",
+  "config.music_tweaks.music_fade_sounds.tooltip": "Sound events that fade out background music while they play. Music fades back in once they finish.",
+
   "config.music_tweaks.jukebox_distance": "Jukebox Distance",
   "config.music_tweaks.jukebox_distance.tooltip": "The radius in blocks around a jukebox that will fade out background music.",
 

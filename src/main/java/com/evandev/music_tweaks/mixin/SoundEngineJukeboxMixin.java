@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -198,7 +199,7 @@ public abstract class SoundEngineJukeboxMixin {
         JukeboxOffsetState.setRecordHearable(hasHearableRecords);
 
         float targetRecordVolume = inCombat ? 0.0f : 1.0f;
-        float targetMusicVolume = (inCombat || hasHearableRecords) ? 0.0f : 1.0f;
+        float targetMusicVolume = (inCombat || hasHearableRecords || musicTweaks$isFadeSoundPlaying()) ? 0.0f : 1.0f;
 
         // Jukebox Fade
         if (musicTweaks$currentRecordVolumeFactor < targetRecordVolume) {
@@ -247,6 +248,19 @@ public abstract class SoundEngineJukeboxMixin {
                 musicTweaks$coordinates.remove(sound);
             }
         }
+    }
+
+    @Unique
+    private boolean musicTweaks$isFadeSoundPlaying() {
+        List<String> fadeSounds = ModConfig.get().musicFadeSounds;
+        if (fadeSounds.isEmpty()) return false;
+        for (Map.Entry<SoundInstance, ChannelAccess.ChannelHandle> entry : musicTweaks$wrapper.getInstanceToChannel().entrySet()) {
+            if (entry.getKey().getSource() != SoundSource.MUSIC && !entry.getValue().isStopped()
+                    && fadeSounds.contains(entry.getKey().getLocation().toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Unique
